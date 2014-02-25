@@ -1,0 +1,77 @@
+//  CArray.h
+//
+//  A C structure for flexibly working with a sequence
+//  of elements that are kept contiguously in memory.
+//  The array length is flexible, and is designed to
+//  support nesting of data structures.
+//
+
+#ifndef __CARRAY_H__
+#define __CARRAY_H__
+
+#include <stdlib.h>
+
+typedef void (*Releaser)(void *element);
+
+typedef struct CArray {
+  int count;
+  int capacity;
+  size_t elementSize;
+  Releaser releaser;
+  char *elements;
+} CArray;
+
+// Constant-time operations.
+
+CArray *CArrayNew(int capacity, size_t elementSize);  // Allocates and initializes a new CArray.
+CArray *CArrayInit(CArray *cArray, int capacity, size_t elementSize);  // For use on an allocated but uninit'd CArray struct.
+
+// The next three methods are O(1) if there's no releaser; O(n) if there is.
+void CArrayClear(CArray *cArray);   // Releases all elements and sets count to 0.
+void CArrayRelease(void *cArray);   // Clears cArray and frees all capacity; doesn't free cArray itself.
+void CArrayDelete(CArray *cArray);  // Releases cArray and frees cArray itself.
+
+void *CArrayElement(CArray *cArray, int index);
+#define CArrayElementOfType(array, i, type) (*(type *)CArrayElement(array, i))
+
+// Amortized constant-time operations (some are usually constant-time, sometimes linear).
+
+void CArrayAppendContents(CArray *cArray, CArray *source);  // Expects cArray != source.
+#define CArrayAddElement(x, y) CArrayAddElementByPointer(x, &y)
+void CArrayAddElementByPointer(CArray *cArray, void *element);
+void *CArrayNewElement(CArray *cArray);
+
+
+// Possibly linear time operations.
+
+// element is expected to be an object already within cArray, i.e.,
+// the location of element should be in the cArray->elements memory buffer.
+void CArrayRemoveElement(CArray *cArray, void *element);
+void CArrayAddZeroedElements(CArray *cArray, int numElements);
+
+// Tools for nice iterations.
+// If you used sizeof(x) to set up the CArray, then the type for CArrayFor
+// is expected to be "x *" (a pointer to x).
+
+void *CArrayEnd(CArray *cArray);
+
+#define CArrayFor(type, var, cArray) \
+for (type var = CArrayElement(cArray, 0); var != CArrayEnd(cArray); ++var)
+
+#define CArrayForBackwards(type, var, cArray) \
+for (type var = CArrayElement(cArray, cArray->count - 1); var >= (type)cArray->elements; --var)
+
+typedef int (*CompareFunction)(void *, const void *, const void *);
+void CArraySort(CArray *cArray, CompareFunction compare, void *compareContext);
+
+// Assumes the array is sorted in ascending memcmp order; does a memcmp of each element
+// in the array, using a binary search.
+void *CArrayFind(CArray *cArray, void *elt);
+
+// This function sorts the array and removes all duplicates.
+// See CArraySort to understand how the sorting works.
+// Unfortunately, worst-case is now O(n^2).  But it will still be fast
+// on lists with very few duplicates.
+void CArrayRemoveDuplicates(CArray *cArray, CompareFunction compare, void *compareContext);
+
+#endif
