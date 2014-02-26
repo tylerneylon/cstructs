@@ -32,7 +32,7 @@ void handleSegFault(int sig) {
   exit(1);
 }
 
-void printIntArray(CArray *intArray) {
+void printIntArray(CArray intArray) {
   CArrayFor(int *, i, intArray) {
     printf("%d ", *i);
   }
@@ -41,11 +41,11 @@ void printIntArray(CArray *intArray) {
 
 int main(int argc, char **argv) {
   signal(SIGSEGV, handleSegFault);
-  CArray *array = CArrayNew(16, sizeof(CArray));
+  CArray array = CArrayNew(16, sizeof(CArrayStruct));
   array->releaser = CArrayRelease;
 
   for (int i = 0; i < 10; ++i) {
-    CArray *subarray = CArrayInit(CArrayNewElement(array), 16, sizeof(int));
+    CArray subarray = CArrayInit(CArrayNewElement(array), 16, sizeof(int));
     printf("subarray = %p\n", subarray);
     for (int j = 0; j < 5; ++j) {
       int newInt = rand() % 10;
@@ -54,7 +54,7 @@ int main(int argc, char **argv) {
     printIntArray(subarray);
   }
 
-  CArrayFor(CArray *, subarray, array) {
+  CArrayFor(CArray, subarray, array) {
     printf("List: ");
     printIntArray(subarray);
   }

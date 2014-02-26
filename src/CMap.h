@@ -16,7 +16,7 @@ typedef int (*Eq)(void *, void*);
 
 typedef struct {
   int count;
-  CArray *buckets;
+  CArray buckets;
   Hash hash;
   Eq eq;
   Releaser keyReleaser;
