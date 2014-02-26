@@ -13,6 +13,10 @@ all: $(obj) $(tests)
 # Indirect rules; meant to only be used to complete a primary rule.
 test-build: $(tests)
 
+## (temp) Here's a suggestion for how to add a test rule:
+## test:
+##	for test in $(TESTS); do bash test-runner.sh $$test || exit 1; done
+
 out:
 	mkdir -p out
 
