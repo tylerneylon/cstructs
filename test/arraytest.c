@@ -11,7 +11,6 @@
 #include <string.h>
 
 // TODO
-// * Check values - not just waiting for a seg fault.
 // * Make sure I have full code coverage.
 // * Include all major use cases (not many).
 // * Look for edge cases.
@@ -72,13 +71,17 @@ void print_trace() {
   free (strings);
 }
 
-void handle_seg_fault(int sig) {
+void test_failed() {
   printf("\r%s - failed \n", program_name);
-  print_trace();
   printf("Failed in test '%s'; log follows:\n---\n", test_name);
   printf("%s\n---\n", log);
   printf("%s failed while running test %s.\n", program_name, test_name);
   exit(1);
+}
+
+void handle_seg_fault(int sig) {
+  print_trace();
+  test_failed();
 }
 
 void start_all_tests(char *name) {
@@ -103,6 +106,14 @@ int end_all_tests() {
   return 0;
 }
 
+void test_that_(int cond, char *cond_str) {
+  if (cond) return;
+  test_printf("The following condition failed: %s\n", cond_str);
+  test_failed();
+}
+
+#define test_that(cond) test_that_(cond, #cond)
+
 
 // End of test framework.
 ////////////////////////////////////////////////////////////////////////////////
@@ -115,8 +126,7 @@ void printIntArray(CArray intArray) {
   test_printf("\n");
 }
 
-int test_array() {
-  signal(SIGSEGV, handle_seg_fault);
+int test_subarrays() {
   CArray array = CArrayNew(16, sizeof(CArrayStruct));
   array->releaser = CArrayRelease;
 
@@ -124,14 +134,18 @@ int test_array() {
     CArray subarray = CArrayInit(CArrayNewElement(array), 16, sizeof(int));
     test_printf("subarray = %p\n", subarray);
     for (int j = 0; j < 5; ++j) {
-      int newInt = rand() % 10;
+      int newInt = j + i * 5;
       CArrayAddElement(subarray, newInt);
     }
     printIntArray(subarray);
   }
 
+  test_printf("Starting to print out subarrays.\n");
+  int i = 0;
   CArrayFor(CArray, subarray, array) {
-    test_printf("List: ");
+    int elt = CArrayElementOfType(subarray, 2, int);
+    test_that(elt == i * 5 + 2);
+    ++i;
     printIntArray(subarray);
   }
 
@@ -140,6 +154,6 @@ int test_array() {
 
 int main(int argc, char **argv) {
   start_all_tests(argv[0]);
-  run_test(test_array);
+  run_test(test_subarrays);
   return end_all_tests();
 }
