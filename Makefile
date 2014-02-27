@@ -16,6 +16,11 @@ test-build: $(tests)
 ## (temp) Here's a suggestion for how to add a test rule:
 ## test:
 ##	for test in $(TESTS); do bash test-runner.sh $$test || exit 1; done
+##
+## Also, on max os x, I can run tests like this to help ensure a crash
+## on any bad memory access:
+## DYLD_INSERT_LIBRARIES=/usr/lib/libgmalloc.dylib ./out/arraytest
+##
 
 out:
 	mkdir -p out

@@ -22,9 +22,16 @@
  * (2) How to work with an array of arrays, if needed.
  */
 
+#define array_size(x) (sizeof(x) / sizeof(x[0]))
+
 
 ////////////////////////////////////////////////////////////////////////////////
 // Test framework. (I plan to move this into it's own file.)
+
+enum {
+  test_success = 0,
+  test_failure = 1
+};
 
 #define LOG_SIZE 65536
 static char *program_name;
@@ -119,13 +126,53 @@ void test_that_(int cond, char *cond_str) {
 ////////////////////////////////////////////////////////////////////////////////
 
 
-void printIntArray(CArray intArray) {
+void print_int_array(CArray intArray) {
   CArrayFor(int *, i, intArray) {
     test_printf("%d ", *i);
   }
   test_printf("\n");
 }
 
+// Test out an array of direct ints.
+int test_int_array() {
+  CArray array = CArrayNew(0, sizeof(int));
+  test_that(array->count == 0);
+
+  int i = 1;
+  CArrayAddElement(array, i);  // array is now [1].
+  test_that(CArrayElementOfType(array, 0, int) == 1);
+  test_that(array->count == 1);
+
+  CArrayAddZeroedElements(array, 2);  // array is now [1, 0, 0].
+  test_that(CArrayElementOfType(array, 2, int) == 0);
+  test_that(array->count == 3);
+
+  // Test out appending another array.
+  CArray other_array = CArrayNew(4, sizeof(int));
+  int other_ints[] = {2, 3, 4, 5};
+  for (i = 0; i < 4; ++i) CArrayAddElement(other_array, other_ints[i]);
+  test_printf("other_array has contents:\n");
+  print_int_array(other_array);
+  CArrayAppendContents(array, other_array);
+  test_printf("Just after append, array is:\n");
+  print_int_array(array);
+  CArrayDelete(other_array);
+  test_that(array->count == 7);
+  test_that(CArrayElementOfType(array, 5, int) == 4);
+
+  // Test out a for loop over the elements.
+  int values[] = {1, 0, 0, 2, 3, 4, 5};
+  i = 0;
+  CArrayFor(int *, int_ptr, array) {
+    test_that(*int_ptr == values[i++]);
+  }
+
+  CArrayDelete(array);
+
+  return test_success;
+}
+
+// This tests a pattern using an array of arrays of ints.
 int test_subarrays() {
   CArray array = CArrayNew(16, sizeof(CArrayStruct));
   array->releaser = CArrayRelease;
@@ -137,7 +184,7 @@ int test_subarrays() {
       int newInt = j + i * 5;
       CArrayAddElement(subarray, newInt);
     }
-    printIntArray(subarray);
+    print_int_array(subarray);
   }
 
   test_printf("Starting to print out subarrays.\n");
@@ -146,14 +193,67 @@ int test_subarrays() {
     int elt = CArrayElementOfType(subarray, 2, int);
     test_that(elt == i * 5 + 2);
     ++i;
-    printIntArray(subarray);
+    print_int_array(subarray);
   }
 
-  return 0;
+  CArrayDelete(array);
+
+  return test_success;
+}
+
+// Test that the releaser is properly called.
+static int num_releaser_calls = 0;
+void counting_releaser(void *element) {
+  num_releaser_calls++;
+}
+
+int test_releaser() {
+  const int num_elts = 32;
+  CArray array = CArrayNew(64, sizeof(int));
+  array->releaser = counting_releaser;
+
+  for (int i = 0; i < num_elts; ++i) {
+    CArrayAddElementByPointer(array, &i);
+  }
+
+  CArrayDelete(array);
+
+  test_printf("num_releaser_calls=%d.\n", num_releaser_calls);
+  test_that(num_releaser_calls == num_elts);
+
+  return test_success;
+}
+
+int test_clear() {
+  return test_success;
+}
+
+int test_sort() {
+  return test_success;
+}
+
+int test_remove() {
+  return test_success;
+}
+
+int test_find() {
+  return test_success;
+}
+
+int test_remove_duplicates() {
+  return test_success;
 }
 
 int main(int argc, char **argv) {
+  TestFunction test_functions[] = {
+    test_subarrays, test_int_array, test_releaser,
+    test_clear, test_sort, test_remove, test_find,
+    test_remove_duplicates
+  };
+
   start_all_tests(argv[0]);
-  run_test(test_subarrays);
+  for (int i = 0; i < array_size(test_functions); ++i) {
+    run_test(test_functions[i]);
+  }
   return end_all_tests();
 }

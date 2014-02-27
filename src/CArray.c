@@ -69,9 +69,10 @@ void *CArrayElement(CArray cArray, int index) {
 }
 
 void CArrayAppendContents(CArray cArray, CArray source) {
+  // We avoid using CArrayFor since we don't know which type of pointer to use.
   for (int i = 0; i < source->count; ++i) {
     void *elt = CArrayElement(source, i);
-    CArrayAddElement(cArray, elt);
+    CArrayAddElementByPointer(cArray, elt);
   }
 }
 
