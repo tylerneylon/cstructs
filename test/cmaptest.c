@@ -1,36 +1,11 @@
 #include "CMap.h"
 
-#include <execinfo.h>
-#include <math.h>
-#include <signal.h>
-#include <stdio.h>
+#include "ctest.h"
+
 #include <stdlib.h>
 #include <string.h>
 
 #define NUM_PAIRS 10000
-
-
-void printTrace() {
-  void *array[10];
-  size_t size;
-  char **strings;
-  size_t i;
-
-  size = backtrace (array, 10);
-  strings = backtrace_symbols (array, size);
- 
-  printf ("Obtained %zd stack frames.\n", size);
-
-  for (i = 0; i < size; i++) printf ("%s\n", strings[i]);
-
-  free (strings);
-}
-
-void handleSegFault(int sig) {
-  printf("Seg fault\n");
-  printTrace();
-  exit(1);
-}
 
 
 typedef struct {
@@ -38,7 +13,13 @@ typedef struct {
   int num;
 } Pair;
 
-char *makeRandomStr() {
+void print_map(CMap map) {
+  CMapFor(pair, map) {
+    test_printf("%s -> %d\n", (char *)pair->key, (int)(long)pair->value);
+  }
+}
+
+char *make_random_str() {
   int len = rand() % 10 + 5;
   char *str = malloc(len + 1);
   int i;
@@ -49,8 +30,8 @@ char *makeRandomStr() {
   return str;
 }
 
-int hash(void *voidStr) {
-  char *str = (char *)voidStr;
+int hash(void *str_void_ptr) {
+  char *str = (char *)str_void_ptr;
   //return *str * 2345 + *(str + 1);
   int h = *str;
   while (*str) {
@@ -60,68 +41,79 @@ int hash(void *voidStr) {
   return h;
 }
 
-int eq(void *voidStr1, void *voidStr2) {
-  return !strcmp(voidStr1, voidStr2);
+int eq(void *str_void_ptr1, void *str_void_ptr2) {
+  return !strcmp(str_void_ptr1, str_void_ptr2);
 }
 
-int main() {
-  signal(SIGSEGV, handleSegFault);
-  signal(11, handleSegFault);
-
+int test_cmap() {
   // Set up an array of pairs; the size is set by NUM_PAIRS.
   Pair pairs[NUM_PAIRS];
   for (int i = 0; i < NUM_PAIRS; ++i) {
-    pairs[i].str = makeRandomStr();
+    pairs[i].str = make_random_str();
     pairs[i].num = rand() % 1000;
   }
 
-  printf("[[2]]\n");
-
-  // Build an array with numEntries entries.
-  int numEntries = 1e6;
+  // Build an array with num_entries entries.
+  int num_entries = 1e6;
   CMap map = CMapNew(hash, eq);
-  for (int i = 0; i < numEntries; ++i) {
+  for (int i = 0; i < num_entries; ++i) {
     int j = rand() % NUM_PAIRS;
-    //printf("%d: Key is %s\n", i, pairs[j].str);
+    //test_printf("%d: Key is %s\n", i, pairs[j].str);
     CMapSet(map, (char *)pairs[j].str, (void *)(long)pairs[j].num);
   }
-  printf("[[3]]\n");
 
-  // Double check that entries seem to be correct.
-  int numFound = 0;
-  int numTested = 100;
-  for (int i = 0; i < numTested; ++i) {
+  // Check that entries seem to be correct.
+  int num_tested = 100;
+  for (int i = 0; i < num_tested; ++i) {
     int j = rand() % NUM_PAIRS;
     KeyValuePair *pair = CMapFind(map, pairs[j].str);
-    if (pair == NULL) continue;
-    numFound++;
-    int foundValue = (int)(long)(pair->value);
-    if (foundValue != pairs[j].num) {
-      printf("Fail!  For key %s, expected value %d but map returned %d\n",
-          pairs[j].str, pairs[j].num, foundValue);
+    int found_value = (int)(long)(pair->value);
+    if (found_value != pairs[j].num) {
+      test_printf("Fail!  For key %s, expected value %d but map returned %d\n",
+          pairs[j].str, pairs[j].num, found_value);
+      test_failed();
     }
   }
-  double singleMiss = (double)(NUM_PAIRS - 1.0) / NUM_PAIRS;
-  double allMissProb = pow(singleMiss, numEntries);
-  double expFindRate = 1.0 - allMissProb;
-  printf("Found %d out of %d lookups (expecting about %.0f%%)\n",
-      numFound, numTested, (100.0 * expFindRate));
 
-  // Do 100k lookups of items probably in the map.
-  for (int i = 0; i < 1e6; ++i) {
-    int j = rand() % NUM_PAIRS;
-    CMapFind(map, pairs[j].str);
-  }
-
-  // Do 100k lookups of items probably not the map.
-  for (int i = 0; i < 1e6; ++i) {
-    char *str = makeRandomStr();
-    CMapFind(map, str);
+  // Do 10k lookups of items probably not in the map.
+  int num_found = 0;
+  int num_checks = 1e4;
+  for (int i = 0; i < num_checks; ++i) {
+    char *str = make_random_str();
+    if(CMapFind(map, str)) num_found++;
+    test_that((float)num_found / num_checks < 0.01);
     free(str);
   }
 
   CMapDelete(map);
-  printf("[[4]]\n");
-  
-  return 0;
+
+  return test_success;
+}
+
+int test_unset() {
+  CMap map = CMapNew(hash, eq);
+  //map->keyReleaser = free;  // But not for literals, my friend.
+
+  CMapSet(map, "book", (void *)4L);
+  CMapSet(map, "games", (void *)5L);
+  CMapSet(map, "burger", (void *)6L);
+  print_map(map);
+
+  test_that(CMapFind(map, "games") != NULL);
+
+  CMapUnset(map, "games");
+  test_printf("After unsetting \"games\":\n");
+  print_map(map);
+
+  test_that(CMapFind(map, "games") == NULL);
+
+  CMapDelete(map);
+
+  return test_success;
+}
+
+int main(int argc, char **argv) {
+  start_all_tests(argv[0]);
+  run_tests(test_cmap, test_unset);
+  return end_all_tests();
 }

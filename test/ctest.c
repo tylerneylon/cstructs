@@ -60,7 +60,7 @@ void run_test_(TestFunction test_fn, char *new_test_name) {
   log[0] = '\0';
   log_cursor = log;
   test_name = new_test_name;
-  test_fn();
+  if(test_fn() != test_success) test_failed();
 }
 
 void run_tests_(char *test_names, ...) {
