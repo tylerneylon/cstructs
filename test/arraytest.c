@@ -59,6 +59,7 @@ int test_printf_(const char *format, ...) {
 }
 
 #define run_test(x) run_test_(x, #x)
+#define run_tests(...) run_tests_(#__VA_ARGS__, __VA_ARGS__)
 
 #define test_printf(...) test_printf_(__VA_ARGS__)
 
@@ -108,6 +109,21 @@ void run_test_(TestFunction test_fn, char *new_test_name) {
   test_fn();
 }
 
+void run_tests_(char *test_names, ...) {
+  va_list args;
+  va_start(args, test_names);
+
+  char *names = strdup(test_names);
+  char *token;
+  while ((token = strsep(&names, " \t\n,")) != NULL) {
+    if (*token == '\0') continue;  // Avoid empty tokens.
+    run_test_(va_arg(args, TestFunction), token);
+  }
+
+  va_end(args);
+  free(names);
+}
+
 int end_all_tests() {
   printf("\r%s - passed \n", program_name);
   return 0;
@@ -126,9 +142,16 @@ void test_that_(int cond, char *cond_str) {
 ////////////////////////////////////////////////////////////////////////////////
 
 
-void print_int_array(CArray intArray) {
-  CArrayFor(int *, i, intArray) {
+void print_int_array(CArray int_array) {
+  CArrayFor(int *, i, int_array) {
     test_printf("%d ", *i);
+  }
+  test_printf("\n");
+}
+
+void print_double_array(CArray double_array) {
+  CArrayFor(double *, d, double_array) {
+    test_printf("%f ", *d);
   }
   test_printf("\n");
 }
@@ -225,35 +248,85 @@ int test_releaser() {
 }
 
 int test_clear() {
+  CArray array = CArrayNew(0, sizeof(double));
+  double values[] = {1.0, 2.0, 3.14};
+  for (int i = 0; i < array_size(values); ++i) CArrayAddElement(array, values[i]);
+  test_that(array->count == 3);
+  test_that(CArrayElementOfType(array, 2, double) == 3.14);
+  CArrayClear(array);
+  test_that(array->count == 0);
+  CArrayDelete(array);
   return test_success;
 }
 
+// Test that sorting works.
+int compare_doubles(void *context, const void *elt1, const void *elt2) {
+  double d1 = *(double *)elt1;
+  double d2 = *(double *)elt2;
+  return d1 - d2;
+}
+
 int test_sort() {
+  CArray array = CArrayNew(0, sizeof(double));
+  double values[] = {-1.2, 2.4, 3.1, 0.0, -2.2};
+  for (int i = 0; i < array_size(values); ++i) CArrayAddElement(array, values[i]);
+  test_that(array->count == 5);
+  test_that(CArrayElementOfType(array, 2, double) == 3.1);
+  test_printf("Before sorting, array is:\n");
+  print_double_array(array);
+  CArraySort(array, compare_doubles, NULL);
+  test_printf("After sorting, array is:\n");
+  print_double_array(array);
+  test_that(CArrayElementOfType(array, 0, double) == -2.2);
+  test_that(CArrayElementOfType(array, 1, double) == -1.2);
+  CArrayDelete(array);
   return test_success;
 }
 
 int test_remove() {
+  CArray array = CArrayNew(0, sizeof(double));
+  double values[] = {2.0, 3.0, 5.0, 7.0};
+  for (int i = 0; i < array_size(values); ++i) CArrayAddElement(array, values[i]);
+  test_that(array->count == 4);
+
+  double *element = CArrayElement(array, 2);
+  test_that(*element == 5.0);
+
+  CArrayRemoveElement(array, element);
+  test_that(array->count == 3);
+  test_that(CArrayElementOfType(array, 2, double) == 7.0);
+  CArrayDelete(array);
   return test_success;
+}
+
+// Test the find functionality; we need to sort elements in memcmp order for find to work.
+int mem_compare(void *context, const void *elt1, const void *elt2) {
+  return memcmp(elt1, elt2, *(size_t *)context);
 }
 
 int test_find() {
-  return test_success;
-}
+  size_t element_size = sizeof(double);
 
-int test_remove_duplicates() {
+  CArray array = CArrayNew(0, element_size);
+  double values[] = {2.0, 3.0, 5.0, 7.0};
+  for (int i = 0; i < array_size(values); ++i) CArrayAddElement(array, values[i]);
+  test_that(array->count == 4);
+
+  CArraySort(array, mem_compare, &element_size);
+
+  void *element = CArrayFind(array, &values[1]);
+  test_that(*(double *)element == values[1]);
+
+  CArrayDelete(array);
+
   return test_success;
 }
 
 int main(int argc, char **argv) {
-  TestFunction test_functions[] = {
-    test_subarrays, test_int_array, test_releaser,
-    test_clear, test_sort, test_remove, test_find,
-    test_remove_duplicates
-  };
-
   start_all_tests(argv[0]);
-  for (int i = 0; i < array_size(test_functions); ++i) {
-    run_test(test_functions[i]);
-  }
+  run_tests(
+    test_subarrays, test_int_array, test_releaser,
+    test_clear, test_sort, test_remove, test_find
+  );
   return end_all_tests();
 }

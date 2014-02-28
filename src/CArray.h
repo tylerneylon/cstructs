@@ -70,10 +70,4 @@ void CArraySort(CArray cArray, CompareFunction compare, void *compareContext);
 // in the array, using a binary search.
 void *CArrayFind(CArray cArray, void *elt);
 
-// This function sorts the array and removes all duplicates.
-// See CArraySort to understand how the sorting works.
-// Unfortunately, worst-case is now O(n^2).  But it will still be fast
-// on lists with very few duplicates.
-void CArrayRemoveDuplicates(CArray cArray, CompareFunction compare, void *compareContext);
-
 #endif
