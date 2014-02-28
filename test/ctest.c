@@ -94,8 +94,9 @@ int test_printf_(const char *format, ...) {
   return chars_added;
 }
 
-void test_that_(int cond, char *cond_str) {
+void test_that_(int cond, char *cond_str, char *filename, int line_number) {
   if (cond) return;
+  test_printf("%s:%d: ", basename(filename), line_number);
   test_printf("The following condition failed: %s\n", cond_str);
   test_failed();
 }

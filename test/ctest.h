@@ -35,7 +35,7 @@ int end_all_tests();
 
 // Send boolean expressions into test_that. If they evaluate to false,
 // the test is considered failing.
-#define test_that(cond) test_that_(cond, #cond)
+#define test_that(cond) test_that_(cond, #cond, __FILE__, __LINE__)
 
 // Directly call test_failed if you perform a custom check.
 void test_failed();
@@ -58,6 +58,6 @@ typedef int (*TestFunction)();
 void run_test_(TestFunction test_fn, char *new_test_name);
 void run_tests_(char *test_names, ...);
 int test_printf_(const char *format, ...);
-void test_that_(int cond, char *cond_str);
+void test_that_(int cond, char *cond_str, char *filename, int line_number);
 
 #endif // __CTEST_CTEST_H__
