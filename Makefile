@@ -1,6 +1,6 @@
 # Variables for targets.
 tests = $(addprefix out/,arraytest listtest cmaptest cmapunsettest)
-obj = $(addprefix out/,CArray.o CList.o CMap.o memprofile.o)
+obj = $(addprefix out/,CArray.o CList.o CMap.o memprofile.o ctest.o)
 
 # Variables for build settings.
 includes = -Isrc
@@ -29,11 +29,17 @@ test-build: $(tests)
 out:
 	mkdir -p out
 
+out/ctest.o: test/ctest.c test/ctest.h | out
+	$(cc) -o out/ctest.o -c test/ctest.c
+
 out/%.o : src/%.c src/%.h | out
 	$(cc) -o $@ -c $<
 
 out/% : test/%.c $(obj)
 	$(cc) -o $@ $^
+
+clean:
+	rm -rf out
 
 # Listing this special-name rule prevents the deletion of intermediate files.
 .SECONDARY:
