@@ -10,16 +10,6 @@
 #include <stdarg.h>
 #include <string.h>
 
-// TODO
-// * Look for edge cases.
-// * Try to keep the test framework general (within CStructs).
-// * Clean up comments within this file.
-
-/* Some practice code to help me know how to do a few things:
- * (1) Print out a stack trace on a signal like a seg fault.
- * (2) How to work with an array of arrays, if needed.
- */
-
 #define array_size(x) (sizeof(x) / sizeof(x[0]))
 
 
@@ -331,11 +321,41 @@ int test_string_array() {
   return test_success;
 }
 
+int test_edge_cases() {
+  CArray array = CArrayNew(0, sizeof(char));
+  for (char c = 'a'; c <= 'z'; ++c) CArrayAddElement(array, c);
+  test_that(CArrayElementOfType(array, 2, char) == 'c');
+  CArrayDelete(array);
+
+  array = CArrayNew(8, sizeof(int));
+  int values[] = {1, 3, 5, 7};
+  for (int i = 0; i < array_size(values); ++i) CArrayAddElement(array, values[i]);
+  test_that(array->count == 4);
+
+  size_t element_size = sizeof(int);
+  CArraySort(array, mem_compare, &element_size);
+  CArrayRemoveElement(array, CArrayElement(array, 3));
+  test_that(array->count == 3);
+  CArrayRemoveElement(array, CArrayElement(array, 2));
+  test_that(array->count == 2);
+  CArrayRemoveElement(array, CArrayElement(array, 0));
+  test_that(array->count == 1);
+  test_that(CArrayElementOfType(array, 0, int) == 3);
+  CArrayRemoveElement(array, CArrayElement(array, 0));
+  test_that(array->count == 0);
+  CArrayClear(array);  // Expected to do nothing, since array is empty.
+
+  CArrayDelete(array);
+
+  return test_success;
+}
+
 int main(int argc, char **argv) {
   start_all_tests(argv[0]);
   run_tests(
     test_subarrays, test_int_array, test_releaser,
-    test_clear, test_sort, test_remove, test_find
+    test_clear, test_sort, test_remove, test_find,
+    test_edge_cases
   );
   return end_all_tests();
 }
