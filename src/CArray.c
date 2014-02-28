@@ -78,7 +78,7 @@ void CArrayAppendContents(CArray cArray, CArray source) {
 
 void CArrayRemoveElement(CArray cArray, void *element) {
   if (cArray->releaser) cArray->releaser(element);
-  int numLeft = cArray->count--;
+  int numLeft = --(cArray->count);
   char *eltByte = (char *)element;
   int byteDist = eltByte - cArray->elements;
   int index = byteDist / cArray->elementSize;

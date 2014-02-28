@@ -11,7 +11,6 @@
 #include <string.h>
 
 // TODO
-// * Make sure I have full code coverage.
 // * Include all major use cases (not many).
 // * Look for edge cases.
 // * Try to keep the test framework general (within CStructs).
@@ -292,6 +291,7 @@ int test_remove() {
   double *element = CArrayElement(array, 2);
   test_that(*element == 5.0);
 
+  test_printf("About to call remove element.\n");
   CArrayRemoveElement(array, element);
   test_that(array->count == 3);
   test_that(CArrayElementOfType(array, 2, double) == 7.0);
