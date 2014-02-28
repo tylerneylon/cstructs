@@ -11,7 +11,6 @@
 #include <string.h>
 
 // TODO
-// * Include all major use cases (not many).
 // * Look for edge cases.
 // * Try to keep the test framework general (within CStructs).
 // * Clean up comments within this file.
@@ -317,6 +316,16 @@ int test_find() {
   void *element = CArrayFind(array, &values[1]);
   test_that(*(double *)element == values[1]);
 
+  CArrayDelete(array);
+
+  return test_success;
+}
+
+int test_string_array() {
+  CArray array = CArrayNew(4, sizeof(char *));
+  CArrayAddElement(array, "hi");
+  CArrayAddElement(array, "there");
+  test_that(strcmp(CArrayElementOfType(array, 0, char *), "hi") == 0);
   CArrayDelete(array);
 
   return test_success;

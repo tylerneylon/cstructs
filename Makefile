@@ -21,6 +21,10 @@ test-build: $(tests)
 ## on any bad memory access:
 ## DYLD_INSERT_LIBRARIES=/usr/lib/libgmalloc.dylib ./out/arraytest
 ##
+## Actually, I like this better as it suppresses some potentially-annoying
+## boilerplate text from guard malloc:
+## DYLD_INSERT_LIBRARIES=/usr/lib/libgmalloc.dylib MALLOC_LOG_FILE=/dev/null ./out/arraytest
+##
 
 out:
 	mkdir -p out
