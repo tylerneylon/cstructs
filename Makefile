@@ -1,6 +1,7 @@
 # Variables for targets.
-tests = $(addprefix out/,arraytest listtest cmaptest cmapunsettest)
+tests = $(addprefix out/,arraytest listtest cmaptest)
 obj = $(addprefix out/,CArray.o CList.o CMap.o memprofile.o ctest.o)
+examples = $(addprefix out/,array_example map_example list_example)
 
 # Variables for build settings.
 includes = -Isrc
@@ -8,10 +9,14 @@ cflags = $(includes)
 cc = clang $(cflags)
 
 # Primary rules; meant to be used directly.
-all: $(obj) $(tests)
+all: $(obj) $(tests) $(examples)
 
 # Indirect rules; meant to only be used to complete a primary rule.
 test-build: $(tests)
+
+# The PHONY rule tells the makefile to ignore the directory named "examples".
+.PHONY : examples
+examples: $(examples)
 
 ## (temp) Here's a suggestion for how to add a test rule:
 ## test:
@@ -35,7 +40,10 @@ out/ctest.o: test/ctest.c test/ctest.h | out
 out/%.o : src/%.c src/%.h | out
 	$(cc) -o $@ -c $<
 
-out/% : test/%.c $(obj)
+$(tests) : out/% : test/%.c $(obj)
+	$(cc) -o $@ $^
+
+$(examples) : out/% : examples/%.c $(obj)
 	$(cc) -o $@ $^
 
 clean:

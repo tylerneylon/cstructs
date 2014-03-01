@@ -133,11 +133,44 @@ int test_store_primitives() {
   return test_success;
 }
 
+int long_eq(void *elt1, void *elt2) {
+  return (long)elt1 == (long)elt2;
+}
+
+void print_long_list(CList list) {
+  CListFor(long, elt, list) {
+    test_printf("%ld ", elt);
+  }
+  test_printf("\n");
+}
+
+int test_delete_mid_list() {
+  CList list = NULL;
+  long values[5] = {2, 3, 5, 7, 11};
+  for (int i = 0; i < 5; ++i) CListInsert(&list, (void *)values[4 - i]);
+  test_that(CListCount(&list) == 5);
+  test_that((long)list->element == 2);
+
+  test_printf("The list is now:\n");
+  print_long_list(list);  // [2, 3, 5, 7, 11].
+
+  CList *tail = CListFindEntry(&list, (void *)5, long_eq);
+  CListDelete(tail);
+
+  test_printf("The list is now:\n");
+  print_long_list(list);  // [2, 3].
+
+  test_that(CListCount(&list) == 2);
+  test_that((long)list->element == 2);
+
+  return test_success;
+}
+
 int main(int argc, char **argv) {
   start_all_tests(argv[0]);
   run_tests(
     test_list, test_list_simple, test_remove_first, test_find_entry,
-    test_store_primitives
+    test_store_primitives, test_delete_mid_list
   );
   return end_all_tests();
 }

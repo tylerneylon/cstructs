@@ -40,8 +40,8 @@ int CListCount(CList *list);
 
 #define CListFor(type, var, list) \
   CList UNIQUE = list; \
-  for (type var = (UNIQUE ? UNIQUE->element : NULL); \
+  for (type var = (type)(UNIQUE ? UNIQUE->element : NULL); \
       UNIQUE; \
-      UNIQUE = UNIQUE->next, var = (UNIQUE ? UNIQUE->element : NULL))
+      UNIQUE = UNIQUE->next, var = (type)(UNIQUE ? UNIQUE->element : NULL))
 
 #endif
