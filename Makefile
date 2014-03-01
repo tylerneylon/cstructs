@@ -1,4 +1,21 @@
+# CStructs Makefile
+#
+# This library is meant to be used by directly including the header you
+# need from among CArray.h, CMap.h, and CList.h and linking with the
+# object files CArray.o, CMap.o, and CList.o.
+#
+# The primary rules are:
+#
+# * all -- Builds everything in the out/ directory.
+# * test -- Builds and runs all tests, printing out the results.
+# * examples -- Builds the examples in the out/ directory.
+# * clean -- Deletes everything this makefile may have created.
+#
+
+#################################################################################
 # Variables for targets.
+
+# Target lists.
 tests = $(addprefix out/,arraytest listtest cmaptest)
 obj = $(addprefix out/,CArray.o CList.o CMap.o memprofile.o ctest.o)
 examples = $(addprefix out/,array_example map_example list_example)
@@ -8,28 +25,33 @@ includes = -Isrc
 cflags = $(includes)
 cc = clang $(cflags)
 
+# Test-running environment.
+testenv = DYLD_INSERT_LIBRARIES=/usr/lib/libgmalloc.dylib MALLOC_LOG_FILE=/dev/null
+
+#################################################################################
 # Primary rules; meant to be used directly.
+
+# Build everything.
 all: $(obj) $(tests) $(examples)
 
-# Indirect rules; meant to only be used to complete a primary rule.
-test-build: $(tests)
+# Build all tests.
+test: $(tests)
+	@echo Running tests:
+	@echo -
+	@for test in $(tests); do $(testenv) $$test || exit 1; done
+	@echo -
+	@echo All tests passed!
 
-# The PHONY rule tells the makefile to ignore the directory named "examples".
-.PHONY : examples
+# Build the examples.
 examples: $(examples)
 
-## (temp) Here's a suggestion for how to add a test rule:
-## test:
-##	for test in $(TESTS); do bash test-runner.sh $$test || exit 1; done
-##
-## Also, on max os x, I can run tests like this to help ensure a crash
-## on any bad memory access:
-## DYLD_INSERT_LIBRARIES=/usr/lib/libgmalloc.dylib ./out/arraytest
-##
-## Actually, I like this better as it suppresses some potentially-annoying
-## boilerplate text from guard malloc:
-## DYLD_INSERT_LIBRARIES=/usr/lib/libgmalloc.dylib MALLOC_LOG_FILE=/dev/null ./out/arraytest
-##
+clean:
+	rm -rf out
+
+#################################################################################
+# Internal rules; meant to only be used indirectly by the above rules.
+
+test-build: $(tests)
 
 out:
 	mkdir -p out
@@ -46,9 +68,8 @@ $(tests) : out/% : test/%.c $(obj)
 $(examples) : out/% : examples/%.c $(obj)
 	$(cc) -o $@ $^
 
-clean:
-	rm -rf out
-
 # Listing this special-name rule prevents the deletion of intermediate files.
 .SECONDARY:
 
+# The PHONY rule tells the makefile to ignore directories with the same name as a rule.
+.PHONY : examples test
