@@ -87,7 +87,7 @@ The following is an informal summary of the remaining functions:
 * `CArraySort` - Sort the array elements using a custom compare function that
   you provide.
 * `CArrayFind` - Performs a binary search on the array; assumes it is already
-  sorted in `memcmp`-order (not that `memcmp` order may not match your custom
+  sorted in `memcmp`-order (note that `memcmp` order may not match your custom
   comparison sort used for `CArraySort`).
 
 ## Using `CMap`
