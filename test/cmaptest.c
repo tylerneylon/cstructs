@@ -139,6 +139,11 @@ int test_clear() {
   test_that(map->count == 0);
   test_that(num_free_calls == 3);
 
+  // Make sure we can still use the map.
+  CMapSet(map, "five", strdup("5"));
+  test_that(map->count == 1);
+  test_that(CMapFind(map, "five") != NULL);
+
   CMapDelete(map);
 
   return test_success;

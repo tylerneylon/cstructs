@@ -50,8 +50,11 @@ CMap CMapNew(Hash hash, Eq eq) {
 }
 
 void CMapDelete(CMap map) {
-  CMapClear(map);
+  CMap oldMap = currentMap;
+  currentMap = map;
+  map->buckets->releaser = ReleaseBucket;
   CArrayDelete(map->buckets);
+  currentMap = oldMap;
   free(map);
 }
 
@@ -97,8 +100,10 @@ KeyValuePair *CMapFind(CMap map, void *needle) {
 void CMapClear(CMap map) {
   CMap oldMap = currentMap;
   currentMap = map;
-  map->buckets->releaser = ReleaseBucket;
-  CArrayClear(map->buckets);
+  CArrayFor(void **, elt_ptr, map->buckets) {
+    CList *list_ptr = (CList *)elt_ptr;
+    CListDeleteAndRelease(list_ptr, ReleaseKeyValuePair);
+  }
   currentMap = oldMap;
   map->count = 0;
 }
