@@ -146,10 +146,11 @@ void use_map() {
 
 ```
 
-The only `CMap` function not used in this examples is
-`CMapUnset`, which accepts a key and removes that value from the hash.
-It is legal to send in a key that is not in the map, in which case
-nothing happens.
+Remaining functions:
+
+* `CMapUnset` - Removes the given key from the map; does nothing if the
+  key is not in the map to begin with.
+* `CMapClear` - Removes all elements from the map.
 
 ## Using `CList`
 
