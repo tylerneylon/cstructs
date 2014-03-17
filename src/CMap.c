@@ -30,6 +30,8 @@ void ReleaseAndFreePair(CMap map, KeyValuePair *pair);
 void ReleaseKeyValuePair(void *pair);
 void ReleaseBucket(void *bucket);
 
+// This variable is safe for single-threaded use, but will
+// have to go if thread-safety is a future goal.
 static CMap currentMap;
 
 // public functions
@@ -48,12 +50,9 @@ CMap CMapNew(Hash hash, Eq eq) {
 }
 
 void CMapDelete(CMap map) {
-  CMap oldMap = currentMap;
-  currentMap = map;
-  map->buckets->releaser = ReleaseBucket;
+  CMapClear(map);
   CArrayDelete(map->buckets);
   free(map);
-  currentMap = oldMap;
 }
 
 void CMapSet(CMap map, void *key, void *value) {
@@ -93,6 +92,14 @@ void CMapUnset(CMap map, void *key) {
 KeyValuePair *CMapFind(CMap map, void *needle) {
   CList *entry = FindWithHash(map, needle, map->hash(needle));
   return entry ? (*entry)->element : NULL;
+}
+
+void CMapClear(CMap map) {
+  CMap oldMap = currentMap;
+  currentMap = map;
+  map->buckets->releaser = ReleaseBucket;
+  CArrayClear(map->buckets);
+  currentMap = oldMap;
 }
 
 typedef struct {

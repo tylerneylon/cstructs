@@ -112,8 +112,43 @@ int test_unset() {
   return test_success;
 }
 
+static int num_free_calls = 0;
+void free_with_counter(void *ptr) {
+  num_free_calls++;
+  free(ptr);
+}
+
+// It occurs to me that this could be implemented
+// more efficiently in CMap.c.
+int map_size(CMap map) {
+  int count = 0;
+  CMapFor(pair, map) ++count;
+  return count;
+}
+
+int test_clear() {
+  CMap map = CMapNew(hash, eq);
+  map->valueReleaser = free_with_counter;
+
+  CMapSet(map, "one", strdup("1"));
+  CMapSet(map, "two", strdup("2"));
+  CMapSet(map, "three", strdup("3"));
+  print_map(map);
+
+  test_that(map_size(map) == 3);
+
+  CMapClear(map);
+
+  test_that(map_size(map) == 0);
+  test_that(num_free_calls == 3);
+
+  CMapDelete(map);
+
+  return test_success;
+}
+
 int main(int argc, char **argv) {
   start_all_tests(argv[0]);
-  run_tests(test_cmap, test_unset);
+  run_tests(test_cmap, test_unset, test_clear);
   return end_all_tests();
 }

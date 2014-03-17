@@ -38,6 +38,8 @@ void CMapSet(CMap map, void *key, void *value);
 void CMapUnset(CMap map, void *key);
 KeyValuePair *CMapFind(CMap map, void *needle);
 
+void CMapClear(CMap map);
+
 // These are for use with CMapFor.
 KeyValuePair *CMapBegin(CMap map, void **iterator);
 KeyValuePair *CMapNext(CMap map, void *iterator);
