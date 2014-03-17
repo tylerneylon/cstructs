@@ -10,7 +10,9 @@
 
 #include "CMap.h"
 
+#ifdef DEBUG
 #include "memprofile.h"
+#endif
 
 #include "CList.h"
 

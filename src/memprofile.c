@@ -1,8 +1,8 @@
 #ifdef __APPLE__
 #include <malloc/malloc.h>
-#define malloc_usable_size malloc_size
 #else
 #include <malloc.h>
+#define malloc_size malloc_usable_size 
 #endif
 
 #include <stdio.h>
@@ -43,17 +43,17 @@ void *memop(char *file, int line, void *ptr, int numBytes, int isRealloc) {
   strncpy(rowFile[row], file, 511);
   rowLine[row] = line;
   if (isRealloc) {
-    int prevSize = malloc_usable_size(ptr);
+    int prevSize = (int)malloc_size(ptr);
     void *vp = realloc(ptr, numBytes);
-    byteDelta[row] += (malloc_usable_size(vp) - prevSize);
+    byteDelta[row] += (malloc_size(vp) - prevSize);
     return vp;
   }
   if (numBytes >= 0) {
     void *vp = malloc(numBytes);
-    byteDelta[row] += malloc_usable_size(vp);
+    byteDelta[row] += malloc_size(vp);
     return vp;
   } else {
-    byteDelta[row] -= malloc_usable_size(ptr);
+    byteDelta[row] -= malloc_size(ptr);
     free(ptr);
     return NULL;
   }

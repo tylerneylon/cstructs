@@ -3,7 +3,9 @@
 
 #include "CList.h"
 
+#ifdef DEBUG
 #include "memprofile.h"
+#endif
 
 void CListInsert(CList *list, void *element) {
   CList nextList = *list;

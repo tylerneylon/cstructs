@@ -2,6 +2,7 @@
 
 #include "ctest.h"
 
+#include <stdio.h>
 #include <string.h>
 
 #define array_size(x) (sizeof(x) / sizeof(x[0]))
@@ -164,6 +165,25 @@ int test_remove() {
   return test_success;
 }
 
+int test_indexof() {
+  CArray array = CArrayNew(0, sizeof(double));
+  double values[] = {2.0, 3.0, 5.0, 7.0};
+  for (int i = 0; i < array_size(values); ++i) CArrayAddElement(array, values[i]);
+  test_that(array->count == 4);
+
+  double *element = CArrayElement(array, 2);
+  test_that(*element == 5.0);
+
+  test_that(CArrayIndexOf(array, element) == 2);
+
+  --element;
+  test_that(CArrayIndexOf(array, element) == 1);
+
+  CArrayDelete(array);
+
+  return test_success;
+}
+
 // Test the find functionality; we need to sort elements in memcmp order for find to work.
 int mem_compare(void *context, const void *elt1, const void *elt2) {
   return memcmp(elt1, elt2, *(size_t *)context);
@@ -189,9 +209,25 @@ int test_find() {
 
 int test_string_array() {
   CArray array = CArrayNew(4, sizeof(char *));
-  CArrayAddElement(array, "hi");
-  CArrayAddElement(array, "there");
-  test_that(strcmp(CArrayElementOfType(array, 0, char *), "hi") == 0);
+
+  // A nice way to add string literals.
+  *(char **)CArrayNewElement(array) = "one";
+  *(char **)CArrayNewElement(array) = "two";
+
+  // A nice way to allocate & store runtime-created strings.
+  asprintf((char **)CArrayNewElement(array), "thr%s", "ee");
+
+  // Note that if you mix the above methods, then you'll have
+  // to be very careful about freeing the strings made by
+  // asprintf but not the literals; therefore it's easier to
+  // avoid mixing them!
+
+  test_that(strcmp(CArrayElementOfType(array, 0, char *), "one") == 0);
+
+  char *s = CArrayElementOfType(array, 2, char *);
+  test_that(strcmp(s, "three") == 0);
+  free(s);
+
   CArrayDelete(array);
 
   return test_success;
@@ -231,7 +267,7 @@ int main(int argc, char **argv) {
   run_tests(
     test_subarrays, test_int_array, test_releaser,
     test_clear, test_sort, test_remove, test_find,
-    test_edge_cases
+    test_indexof, test_string_array, test_edge_cases
   );
   return end_all_tests();
 }
