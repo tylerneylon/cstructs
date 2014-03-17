@@ -100,6 +100,7 @@ void CMapClear(CMap map) {
   map->buckets->releaser = ReleaseBucket;
   CArrayClear(map->buckets);
   currentMap = oldMap;
+  map->count = 0;
 }
 
 typedef struct {

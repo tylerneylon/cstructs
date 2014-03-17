@@ -7,6 +7,8 @@
 
 #define NUM_PAIRS 10000
 
+#define false 0
+#define true 1
 
 typedef struct {
   char *str;
@@ -114,20 +116,15 @@ int test_unset() {
 
 static int num_free_calls = 0;
 void free_with_counter(void *ptr) {
+  test_printf("%s called.\n", __func__);
   num_free_calls++;
   free(ptr);
 }
 
-// It occurs to me that this could be implemented
-// more efficiently in CMap.c.
-int map_size(CMap map) {
-  int count = 0;
-  CMapFor(pair, map) ++count;
-  return count;
-}
-
 int test_clear() {
   CMap map = CMapNew(hash, eq);
+
+  num_free_calls = 0;
   map->valueReleaser = free_with_counter;
 
   CMapSet(map, "one", strdup("1"));
@@ -135,11 +132,11 @@ int test_clear() {
   CMapSet(map, "three", strdup("3"));
   print_map(map);
 
-  test_that(map_size(map) == 3);
+  test_that(map->count == 3);
 
   CMapClear(map);
 
-  test_that(map_size(map) == 0);
+  test_that(map->count == 0);
   test_that(num_free_calls == 3);
 
   CMapDelete(map);
@@ -147,8 +144,50 @@ int test_clear() {
   return test_success;
 }
 
+// The iterators are built so we can edit or delete
+// the current element if we want to; test this.
+int test_delete_in_for() {
+  CMap map = CMapNew(hash, eq);
+
+  num_free_calls = 0;
+  map->valueReleaser = free_with_counter;
+
+  CMapSet(map, "one", strdup("1"));
+  CMapSet(map, "two", strdup("2"));
+  CMapSet(map, "three", strdup("3"));
+  print_map(map);
+
+  test_that(map->count == 3);
+
+  int i = 0;
+  CMapFor(pair, map) {
+    if (i == 1) {
+      map->valueReleaser(pair->value);
+      pair->value = strdup("4");
+      test_that(num_free_calls == 1);
+    } else if (i == 2) {
+      CMapUnset(map, pair->key);
+    }
+    ++i;
+  }
+  test_that(i == 3);
+
+  test_that(map->count == 2);
+  test_that(num_free_calls == 2);
+
+  int four_is_a_value = false;
+  CMapFor(pair, map) {
+    if (strcmp(pair->value, "4") == 0) four_is_a_value = true;
+  }
+  test_that(four_is_a_value);
+
+  CMapDelete(map);
+  return test_success;
+}
+
 int main(int argc, char **argv) {
   start_all_tests(argv[0]);
-  run_tests(test_cmap, test_unset, test_clear);
+  run_tests(test_cmap, test_unset, test_clear,
+            test_delete_in_for);
   return end_all_tests();
 }
