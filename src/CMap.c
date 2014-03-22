@@ -46,6 +46,7 @@ CMap CMapNew(Hash hash, Eq eq) {
   map->eq = eq;
   map->keyReleaser = NULL;
   map->valueReleaser = NULL;
+  map->pairBytes = sizeof(KeyValuePair);
   return map;
 }
 
@@ -68,7 +69,7 @@ void CMapSet(CMap map, void *key, void *value) {
     pair->value = value;
   } else {
     // New pair.
-    KeyValuePair *pair = malloc(sizeof(KeyValuePair));
+    KeyValuePair *pair = malloc(map->pairBytes);
     pair->key = key;
     pair->value = value;
 

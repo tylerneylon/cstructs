@@ -21,6 +21,7 @@ typedef struct {
   Eq eq;
   Releaser keyReleaser;
   Releaser valueReleaser;
+  size_t pairBytes;  // Leave alone in normal use; see below for more.
 } CMapStruct;
 
 typedef CMapStruct *CMap;
@@ -54,6 +55,11 @@ KeyValuePair *CMapNext(CMap map, void *iterator);
   void *UNIQUE; \
   for (KeyValuePair *var = CMapBegin(map, &UNIQUE); \
        var; var = CMapNext(map, UNIQUE))
+
+// Note: The pairBytes value in a CMap is used to determine the size
+//       allocated for each KeyValuePair. It should be at least
+//       sizeof(KeyValuePair), but may be larger for containers that
+//       make customized use of a CMap.
 
 #endif
 
