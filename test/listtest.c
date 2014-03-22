@@ -92,10 +92,12 @@ int test_remove_first() {
   for (int i = 0; i < 5; ++i) CListInsert(&list, values + i);
 
   // Before removing, we expect the list to be [11, 7, 5, 3, 2].
-  CListRemoveFirst(&list);
+  void *item = CListRemoveFirst(&list);
+  test_that(*(int *)item == 11);
   test_that(*(int *)list->element == 7);
 
-  CListRemoveFirst(&list);
+  item = CListRemoveFirst(&list);
+  test_that(*(int *)item == 7);
   test_that(*(int *)list->element == 5);
 
   test_that(CListCount(&list) == 3);

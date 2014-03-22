@@ -14,11 +14,12 @@ void CListInsert(CList *list, void *element) {
   (*list)->next = nextList;
 }
 
-void CListRemoveFirst(CList *list) {
-  if (*list == NULL) return;
-  CList secondItem = (*list)->next;
+void *CListRemoveFirst(CList *list) {
+  if (*list == NULL) return NULL;
+  CListStruct removed_item = **list;
   free(*list);
-  *list = secondItem;
+  *list = removed_item.next;
+  return removed_item.element;
 }
 
 void CListDelete(CList *list) {
