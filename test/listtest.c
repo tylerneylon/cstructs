@@ -168,11 +168,48 @@ int test_delete_mid_list() {
   return test_success;
 }
 
+int test_move_first() {
+  CList list1 = NULL;
+  long values[5] = {2, 3, 5, 7, 11};
+  for (int i = 0; i < 5; ++i) CListInsert(&list1, (void *)values[4 - i]);
+
+  // The list now contains the literal values [2, 3, 5, 7, 11].
+
+  CList list2 = NULL;
+  test_printf("The lists are now:\n");
+  print_long_list(list1);
+  print_long_list(list2);
+
+  // Moving from an empty list should return NULL and change nothing.
+  void *item = CListMoveFirst(&list2, &list1);
+  test_that(item == NULL);
+  test_that(CListCount(&list1) == 5);
+  test_that(CListCount(&list2) == 0);
+
+  // Move 2 over; result is list1 = [3, 5, 7, 11]; list2 = [2].
+  item = CListMoveFirst(&list1, &list2);
+
+  test_printf("The lists are now:\n");
+  print_long_list(list1);
+  print_long_list(list2);
+
+  test_that((long)item == 2);
+  test_that((long)list2->element == 2);
+  test_that((long)list1->element == 3);
+  test_that(CListCount(&list1) == 4);
+  test_that(CListCount(&list2) == 1);
+
+  CListDelete(&list1);
+  CListDelete(&list2);
+
+  return test_success;
+}
+
 int main(int argc, char **argv) {
   start_all_tests(argv[0]);
   run_tests(
     test_list, test_list_simple, test_remove_first, test_find_entry,
-    test_store_primitives, test_delete_mid_list
+    test_store_primitives, test_delete_mid_list, test_move_first
   );
   return end_all_tests();
 }

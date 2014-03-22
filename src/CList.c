@@ -22,6 +22,20 @@ void *CListRemoveFirst(CList *list) {
   return removed_item.element;
 }
 
+void *CListMoveFirst(CList *from, CList *to) {
+  if (*from == NULL) return NULL;
+
+  // from starts [a, b, ..]; to starts [c, ..].
+  CList a = *from;
+  CList b = (*from)->next;
+  CList c = *to;
+  *to = a;
+  a->next = c;
+  *from = b;
+
+  return a->element;
+}
+
 void CListDelete(CList *list) {
   CListDeleteAndRelease(list, NULL);
 }
