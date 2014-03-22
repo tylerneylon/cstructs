@@ -57,10 +57,5 @@ KeyValuePair *CMapNext(CMap map, void *iterator);
   for (KeyValuePair *var = CMapBegin(map, &UNIQUE); \
        var; var = CMapNext(map, UNIQUE))
 
-// Note: The pairBytes value in a CMap is used to determine the size
-//       allocated for each KeyValuePair. It should be at least
-//       sizeof(KeyValuePair), but may be larger for containers that
-//       make customized use of a CMap.
-
 #endif
 
