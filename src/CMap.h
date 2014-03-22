@@ -13,6 +13,7 @@
 
 typedef int (*Hash)(void *);
 typedef int (*Eq)(void *, void*);
+typedef void *(*Alloc)(size_t);
 
 typedef struct {
   int count;
@@ -21,7 +22,7 @@ typedef struct {
   Eq eq;
   Releaser keyReleaser;
   Releaser valueReleaser;
-  size_t pairBytes;  // Leave alone in normal use; see below for more.
+  Alloc pairAlloc;  // Default is malloc; customize to add fields per key/value.
 } CMapStruct;
 
 typedef CMapStruct *CMap;
@@ -35,7 +36,7 @@ typedef struct {
 CMap CMapNew(Hash hash, Eq eq);
 void CMapDelete(CMap map);
 
-void CMapSet(CMap map, void *key, void *value);
+KeyValuePair *CMapSet(CMap map, void *key, void *value);
 void CMapUnset(CMap map, void *key);
 KeyValuePair *CMapFind(CMap map, void *needle);
 

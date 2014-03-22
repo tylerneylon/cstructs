@@ -46,7 +46,7 @@ CMap CMapNew(Hash hash, Eq eq) {
   map->eq = eq;
   map->keyReleaser = NULL;
   map->valueReleaser = NULL;
-  map->pairBytes = sizeof(KeyValuePair);
+  map->pairAlloc = malloc;
   return map;
 }
 
@@ -59,17 +59,19 @@ void CMapDelete(CMap map) {
   free(map);
 }
 
-void CMapSet(CMap map, void *key, void *value) {
+KeyValuePair *CMapSet(CMap map, void *key, void *value) {
   int h = map->hash(key);
   CList *entry = FindWithHash(map, key, h);
+  KeyValuePair *pair;
   if (entry) {
-    KeyValuePair *pair = (*entry)->element;
-    if (pair->value == value) return;
+    pair = (*entry)->element;
+    if (pair->value == value) return pair;
     if (map->valueReleaser) map->valueReleaser(pair->value);
+    // TODO Release and reset pair->key if keyReleaser && pair->value != value.
     pair->value = value;
   } else {
     // New pair.
-    KeyValuePair *pair = malloc(map->pairBytes);
+    pair = map->pairAlloc(sizeof(KeyValuePair));
     pair->key = key;
     pair->value = value;
 
@@ -82,6 +84,7 @@ void CMapSet(CMap map, void *key, void *value) {
     CListInsert(bucket, pair);
     map->count++;
   }
+  return pair;
 }
 
 void CMapUnset(CMap map, void *key) {

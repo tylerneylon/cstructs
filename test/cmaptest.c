@@ -96,9 +96,20 @@ int test_unset() {
   CMap map = CMapNew(hash, eq);
   //map->keyReleaser = free;  // But not for literals, my friend.
 
-  CMapSet(map, "book", (void *)4L);
-  CMapSet(map, "games", (void *)5L);
-  CMapSet(map, "burger", (void *)6L);
+  KeyValuePair *pair = CMapSet(map, "book", (void *)4L);
+  test_that(strcmp(pair->key, "book") == 0);
+  test_that((long)pair->value == 4);
+
+  pair = CMapSet(map, "book", (void *)5L);
+  test_that(strcmp(pair->key, "book") == 0);
+  test_that((long)pair->value == 5);
+
+  pair = CMapSet(map, "games", (void *)6L);
+  test_that(pair != NULL);
+
+  pair = CMapSet(map, "burger", (void *)7L);
+  test_that(pair != NULL);
+
   print_map(map);
 
   test_that(CMapFind(map, "games") != NULL);
