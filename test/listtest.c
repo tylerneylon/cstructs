@@ -128,7 +128,7 @@ int test_store_primitives() {
   CListInsert(&list, (void *)10);
   CListInsert(&list, (void *)20);
   test_that(CListCount(&list) == 2);
-  test_that((int)list->element == 20);
+  test_that((long)list->element == 20);
 
   CListDelete(&list);
 

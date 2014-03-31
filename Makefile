@@ -22,8 +22,12 @@ examples = $(addprefix out/,array_example map_example list_example)
 
 # Variables for build settings.
 includes = -Isrc
-cflags = $(includes)
-cc = clang $(cflags)
+ifeq ($(shell uname -s), Darwin)
+	cflags = $(includes) -std=c99
+else
+	cflags = $(includes) -std=c99 -D _BSD_SOURCE -D _GNU_SOURCE
+endif
+cc = gcc $(cflags)
 
 # Test-running environment.
 testenv = DYLD_INSERT_LIBRARIES=/usr/lib/libgmalloc.dylib MALLOC_LOG_FILE=/dev/null
