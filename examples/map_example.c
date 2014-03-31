@@ -45,7 +45,7 @@ void use_map() {
   // xyz -> 2
   // ... although the lines may appear in any order.
   CMapFor(pair, map) {
-    printf("%s -> %ld\n", pair->key, (long)pair->value);
+    printf("%s -> %ld\n", (char *)pair->key, (long)pair->value);
   }
 
   // Delete every map created with CMapNew.

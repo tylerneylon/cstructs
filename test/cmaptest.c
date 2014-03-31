@@ -71,9 +71,8 @@ int test_cmap() {
     KeyValuePair *pair = CMapFind(map, pairs[j].str);
     int found_value = (int)(long)(pair->value);
     if (found_value != pairs[j].num) {
-      test_printf("Fail!  For key %s, expected value %d but map returned %d\n",
+      test_failed("For key %s, expected value %d but map returned %d\n",
           pairs[j].str, pairs[j].num, found_value);
-      test_failed();
     }
   }
 

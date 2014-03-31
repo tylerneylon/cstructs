@@ -38,7 +38,7 @@ int end_all_tests();
 #define test_that(cond) test_that_(cond, #cond, __FILE__, __LINE__)
 
 // Directly call test_failed if you perform a custom check.
-void test_failed();
+void test_failed(char *reason_fmt, ...);
 
 
 ////////////////////////////////////////////////////////
