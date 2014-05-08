@@ -15,7 +15,7 @@ void CListInsert(CList *list, void *element) {
 }
 
 void *CListRemoveFirst(CList *list) {
-  if (*list == NULL) return NULL;
+  if (*list == NULL) { return NULL; }  // See note [1] below.
   CListStruct removed_item = **list;
   free(*list);
   *list = removed_item.next;
@@ -23,7 +23,7 @@ void *CListRemoveFirst(CList *list) {
 }
 
 void *CListMoveFirst(CList *from, CList *to) {
-  if (*from == NULL) return NULL;
+  if (*from == NULL) { return NULL; }  // See note [1] below.
 
   // from starts [a, b, ..]; to starts [c, ..].
   CList a = *from;
@@ -80,3 +80,8 @@ int CListCount(CList *list) {
   for (CList iter = *list; iter; iter = iter->next, ++n);
   return n;
 }
+
+// [1] There's a bug in visual studio 2013 where variable declarations after
+//     a one-line code block without braces aren't recognized. The workaround is
+//     to add braces to those one-liners. See the comments here:
+//     http://stackoverflow.com/a/9903698/3561

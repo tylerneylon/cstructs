@@ -1,4 +1,4 @@
-#include "CMap.h"
+#include "cstructs/cstructs.h"
 
 #include <stdio.h>
 #include <string.h>

@@ -21,7 +21,7 @@ obj = $(addprefix out/,CArray.o CList.o CMap.o memprofile.o ctest.o)
 examples = $(addprefix out/,array_example map_example list_example)
 
 # Variables for build settings.
-includes = -Isrc
+includes = -I.
 ifeq ($(shell uname -s), Darwin)
 	cflags = $(includes) -std=c99
 else
@@ -63,7 +63,7 @@ out:
 out/ctest.o: test/ctest.c test/ctest.h | out
 	$(cc) -o out/ctest.o -c test/ctest.c
 
-out/%.o : src/%.c src/%.h | out
+out/%.o : cstructs/%.c cstructs/%.h | out
 	$(cc) -o $@ -c $<
 
 $(tests) : out/% : test/%.c $(obj)

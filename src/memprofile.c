@@ -1,8 +1,13 @@
+#ifdef _WIN32
+#include <malloc.h>
+#define malloc_size _msize
+#else
 #ifdef __APPLE__
 #include <malloc/malloc.h>
 #else
 #include <malloc.h>
 #define malloc_size malloc_usable_size 
+#endif
 #endif
 
 #include <stdio.h>
@@ -10,6 +15,14 @@
 #include <string.h>
 
 #include "memprofile.h"
+
+// Set up windows-specific wrappers.
+#ifdef _WIN32
+
+#define strncpy(dst, src, num) strncpy_s(dst, num, src, _TRUNCATE)
+
+#endif
+
 
 #define tableSize 500
 
@@ -41,6 +54,7 @@ void *memop(char *file, int line, void *ptr, int numBytes, int isRealloc) {
   }
   int row = rowNum(file, line);
   strncpy(rowFile[row], file, 511);
+  rowFile[row][511] = '\0';
   rowLine[row] = line;
   if (isRealloc) {
     int prevSize = (int)malloc_size(ptr);
@@ -80,7 +94,8 @@ void printmeminfo() {
       }
       if (fileIndex == -1) {
         fileIndex = numFiles++;
-        strcpy(files[fileIndex], rowFile[i]);
+        strncpy(files[fileIndex], rowFile[i], 511);
+        files[fileIndex][511] = '\0';
         fileNet[fileIndex] = 0;
       }
       fileNet[fileIndex] += byteDelta[i];
@@ -93,8 +108,11 @@ void printmeminfo() {
   }
 
 #ifndef __APPLE__
+#ifndef _WIN32
+  // malloc_stats doesn't exist in mac os x or windows.
   printf("malloc_stats:\n");
   malloc_stats();
+#endif
 #endif
 
 }

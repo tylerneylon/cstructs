@@ -118,7 +118,7 @@ int CompareAsInts(void *eltSize, const void *elt1, const void *elt2) {
   size_t s = *(size_t *)eltSize;
   unsigned char *e1 = (unsigned char *)elt1;
   unsigned char *e2 = (unsigned char *)elt2;
-  for (int i = 0; i < s; ++i) {
+  for (size_t i = 0; i < s; ++i) {
     int diff = *(e1 + i) - *(e2 + i);
     if (diff != 0) return diff;
   }

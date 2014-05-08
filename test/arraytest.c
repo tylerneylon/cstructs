@@ -1,4 +1,4 @@
-#include "CArray.h"
+#include "cstructs/cstructs.h"
 
 #include "ctest.h"
 
@@ -6,6 +6,25 @@
 #include <string.h>
 
 #define array_size(x) (sizeof(x) / sizeof(x[0]))
+
+#ifdef _WIN32
+
+#include <stdarg.h>
+
+int asprintf(char **buffer, const char *fmt, ...) {
+  va_list args;
+  va_start(args, fmt);
+
+  int num_chars = _vscprintf(fmt, args);
+  *buffer = malloc(num_chars + 1);  // + 1 for the final '\0'.
+  vsprintf_s(*buffer, num_chars + 1, fmt, args);
+
+  va_end(args);
+
+  return num_chars;
+}
+
+#endif
 
 void print_int_array(CArray int_array) {
   CArrayFor(int *, i, int_array) {
@@ -128,7 +147,8 @@ int test_clear() {
 int compare_doubles(void *context, const void *elt1, const void *elt2) {
   double d1 = *(double *)elt1;
   double d2 = *(double *)elt2;
-  return d1 - d2;
+  if (d1 > d2) return 1;
+  return d1 < d2 ? -1 : 0;
 }
 
 int test_sort() {

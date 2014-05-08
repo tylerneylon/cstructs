@@ -1,9 +1,13 @@
-#include "CMap.h"
+#include "cstructs/cstructs.h"
 
 #include "ctest.h"
 
 #include <stdlib.h>
 #include <string.h>
+
+#ifdef _WIN32
+#define strdup _strdup
+#endif
 
 #define NUM_PAIRS 10000
 
@@ -56,7 +60,7 @@ int test_cmap() {
   }
 
   // Build an array with num_entries entries.
-  int num_entries = 1e6;
+  int num_entries = (int)1e6;
   CMap map = CMapNew(hash, eq);
   for (int i = 0; i < num_entries; ++i) {
     int j = rand() % NUM_PAIRS;
@@ -78,7 +82,7 @@ int test_cmap() {
 
   // Do 10k lookups of items probably not in the map.
   int num_found = 0;
-  int num_checks = 1e4;
+  int num_checks = (int)1e4;
   for (int i = 0; i < num_checks; ++i) {
     char *str = make_random_str();
     if(CMapFind(map, str)) num_found++;
@@ -126,7 +130,6 @@ int test_unset() {
 
 static int num_free_calls = 0;
 void free_with_counter(void *ptr) {
-  test_printf("%s called.\n", __func__);
   num_free_calls++;
   free(ptr);
 }
