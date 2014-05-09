@@ -9,6 +9,7 @@
 
 #include <malloc.h>
 #include <stdarg.h>
+#include <stdio.h>
 
 #define strdup _strdup
 

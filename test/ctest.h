@@ -37,6 +37,9 @@ int end_all_tests();
 // the test is considered failing.
 #define test_that(cond) test_that_(cond, #cond, __FILE__, __LINE__)
 
+// A special case of test_that behavior for testing string equality.
+#define test_str_eq(s1, s2) test_str_eq_(s1, s2, __FILE__, __LINE__)
+
 // Directly call test_failed if you perform a custom check.
 void test_failed(char *reason_fmt, ...);
 
@@ -61,5 +64,6 @@ void run_test_(TestFunction test_fn, char *new_test_name);
 void run_tests_(char *test_names, ...);
 int test_printf_(const char *format, ...);
 void test_that_(int cond, char *cond_str, char *filename, int line_number);
+void test_str_eq_(char *s1, char *s2, char *filename, int line_number);
 
 #endif // __CTEST_CTEST_H__

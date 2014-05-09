@@ -134,6 +134,12 @@ void test_that_(int cond, char *cond_str, char *filename, int line_number) {
   test_failed("");
 }
 
+void test_str_eq_(char *s1, char *s2, char *filename, int line_number) {
+  if (strcmp(s1, s2) == 0) return;
+  test_failed("%s:%d: These strings were not equal: \"%s\" vs \"%s\"\n",
+              basename(filename), line_number, s1, s2);
+}
+
 void test_failed(char *reason_fmt, ...) {
   if (!log_is_verbose) {
     // If log_is_verbose, then the log is already printed out by now.
