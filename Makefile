@@ -16,7 +16,7 @@
 # Variables for targets.
 
 # Target lists.
-tests = $(addprefix out/,arraytest listtest cmaptest)
+tests = $(addprefix out/,arraytest listtest maptest)
 obj = $(addprefix out/,CArray.o CList.o CMap.o memprofile.o ctest.o)
 examples = $(addprefix out/,array_example map_example list_example)
 
