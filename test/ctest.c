@@ -11,51 +11,10 @@
 #include <stdlib.h>
 #include <string.h>
 
-// TODO Move this block of windows-only wrapper code out into its own file.
+// Platform-specific includes.
 #ifdef _WIN32
-
-#include <malloc.h>
-
-// Windows doesn't give us easy access to stack traces. For more debug power,
-// turn off the seg fault handler and run the test with visual
-// studio's debug tools. Another option would be to integrate this class:
-// http://stackwalker.codeplex.com/
-#define print_trace()
-
-#define strdup _strdup
-
-char *basename(char *path) {
-  static char fname[_MAX_FNAME + _MAX_EXT];
-  static char ext  [_MAX_EXT];
-  _splitpath_s(
-    path,
-    NULL,  0,  // drive
-    NULL,  0,  // dir
-    fname, _MAX_FNAME,
-    ext,   _MAX_EXT);
-  strcat_s(fname, sizeof(fname), ext);
-  return fname;
-}
-
-char *strsep(char **stringp, const char *delim) {
-  if (*stringp == NULL) { return NULL; }
-
-  char *token_start = *stringp;
-  *stringp = strpbrk(token_start, delim);
-  if (*stringp) {
-    **stringp = '\0';
-    (*stringp)++;
-  }
-
-  return token_start;
-}
-
-#define vsnprintf(s, n, fmt, args) vsnprintf_s(s, n, _TRUNCATE, fmt, args)
-#define strncpy(dst, src, num) strncpy_s(dst, num, src, _TRUNCATE)
-#define snprintf(s, n, fmt, ...) sprintf_s(s, n, fmt, __VA_ARGS__)
-
+#include "winutil.h"
 #else
-// Non-windows includes.
 #include <alloca.h>
 #include <execinfo.h>
 #include <libgen.h>
@@ -76,15 +35,19 @@ static int log_is_verbose = 0;
 ////////////////////////////////////////////////////////
 // Static (internal) function definitions.
 
-#ifndef _WIN32
 static void print_trace() {
+  // Windows doesn't give us easy access to stack traces. For more debug power,
+  // turn off the seg fault handler and run the test with visual
+  // studio's debug tools. Another option would be to integrate this class:
+  // http://stackwalker.codeplex.com/
+#ifndef _WIN32
   void *array[10];
   size_t size = backtrace(array, 10);
   char **strings = backtrace_symbols(array, size);
   for (size_t i = 0; i < size; ++i) test_printf("%s\n", strings[i]);
   free(strings);
-}
 #endif
+}
 
 static void handle_seg_fault(int sig) {
   print_trace();

@@ -5,26 +5,9 @@
 #include <stdio.h>
 #include <string.h>
 
+#include "winutil.h"
+
 #define array_size(x) (sizeof(x) / sizeof(x[0]))
-
-#ifdef _WIN32
-
-#include <stdarg.h>
-
-int asprintf(char **buffer, const char *fmt, ...) {
-  va_list args;
-  va_start(args, fmt);
-
-  int num_chars = _vscprintf(fmt, args);
-  *buffer = malloc(num_chars + 1);  // + 1 for the final '\0'.
-  vsprintf_s(*buffer, num_chars + 1, fmt, args);
-
-  va_end(args);
-
-  return num_chars;
-}
-
-#endif
 
 void print_int_array(CArray int_array) {
   CArrayFor(int *, i, int_array) {

@@ -1,3 +1,11 @@
+#include "memprofile.h"
+
+#undef malloc
+#undef realloc
+#undef free
+
+// Include the system-specific malloc include, and
+// redirect malloc_size to the system-specific version.
 #ifdef _WIN32
 #include <malloc.h>
 #define malloc_size _msize
@@ -14,13 +22,10 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "memprofile.h"
 
-// Set up windows-specific wrappers.
+// Enable strncpy on windows.
 #ifdef _WIN32
-
 #define strncpy(dst, src, num) strncpy_s(dst, num, src, _TRUNCATE)
-
 #endif
 
 
@@ -31,9 +36,6 @@ static char rowFile[tableSize][512];
 static int rowLine[tableSize];
 static int isZeroed = 0;
 
-#undef malloc
-#undef realloc
-#undef free
 
 int rowNum(char *file, int line) {
   char *c = file;
