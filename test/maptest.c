@@ -1,3 +1,8 @@
+// maptest.c
+//
+// Home repo: https://github.com/tylerneylon/cstructs
+//
+
 #include "cstructs/cstructs.h"
 
 #include "ctest.h"

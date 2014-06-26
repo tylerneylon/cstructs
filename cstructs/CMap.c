@@ -1,12 +1,15 @@
-//  CMap.c
+// CMap.c
 //
-//  Internal structure:
-//  An array of buckets of size s = 2^n, where n grows to keep
-//  the average load below 8.
-//  We look up x by finding i = hash(x), then checking buckets
-//  [i % s, i % (s/2), i % (s/4), ... ] down to % MIN_BUCKETS.
-//  If avg load is > 8 just after an addition, we double the
-//  number of buckets.
+// Home repo: https://github.com/tylerneylon/cstructs
+//
+// Internal structure:
+// An array of buckets of size s = 2^n, where n grows to keep
+// the average load below 8.
+// We look up x by finding i = hash(x), then checking buckets
+// [i % s, i % (s/2), i % (s/4), ... ] down to % MIN_BUCKETS.
+// If avg load is > 8 just after an addition, we double the
+// number of buckets.
+//
 
 #include "CMap.h"
 

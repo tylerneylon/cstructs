@@ -1,3 +1,8 @@
+// memprofile.c
+//
+// Home repo: https://github.com/tylerneylon/cstructs
+//
+
 #include "memprofile.h"
 
 #undef malloc

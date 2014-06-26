@@ -1,3 +1,8 @@
+// memprofile.h
+//
+// Home repo: https://github.com/tylerneylon/cstructs
+//
+
 #pragma once
 
 void *memop(char *file, int line, void *ptr, int numBytes, int isRealloc);

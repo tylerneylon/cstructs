@@ -1,6 +1,6 @@
-//  CArray.c
+// CArray.c
 //
-//  Created by Tyler Neylon on 1/2/11.
+// Home repo: https://github.com/tylerneylon/cstructs
 //
 
 #include "CArray.h"

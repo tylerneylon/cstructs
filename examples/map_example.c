@@ -1,3 +1,8 @@
+// map_example.c
+//
+// Home repo: https://github.com/tylerneylon/cstructs
+//
+
 #include "cstructs/cstructs.h"
 
 #include <stdio.h>

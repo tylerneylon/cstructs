@@ -1,7 +1,9 @@
-//  CMap.h
+// CMap.h
 //
-//  C-based hash map.
-//  Lookups are fast, sizing grows as needed.
+// Home repo: https://github.com/tylerneylon/cstructs
+//
+// C-based hash map.
+// Lookups are fast, sizing grows as needed.
 //
 
 #ifndef __CMAP_H__
