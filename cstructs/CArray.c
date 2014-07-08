@@ -20,7 +20,7 @@ CArray CArrayInit(CArray cArray, int capacity, size_t elementSize) {
   cArray->elementSize = elementSize;
   cArray->releaser = NULL;
   if (capacity) {
-    cArray->elements = malloc((int)elementSize * capacity);
+    cArray->elements = malloc(elementSize * capacity);
   } else {
     cArray->elements = NULL;
   }
@@ -52,7 +52,7 @@ void *CArrayNewElement(CArray cArray) {
   if (cArray->count == cArray->capacity) {
     cArray->capacity *= 2;
     if (cArray->capacity == 0) cArray->capacity = 1;
-    cArray->elements = realloc(cArray->elements, cArray->capacity * (int)cArray->elementSize);
+    cArray->elements = realloc(cArray->elements, cArray->capacity * cArray->elementSize);
   }
   cArray->count++;
   return CArrayElement(cArray, cArray->count - 1);
@@ -60,7 +60,7 @@ void *CArrayNewElement(CArray cArray) {
 
 int CArrayIndexOf(CArray cArray, void *element) {
   ptrdiff_t byte_dist = (char *)element - cArray->elements;
-  return (int)(byte_dist / cArray->elementSize);
+  return byte_dist / cArray->elementSize;
 }
 
 void CArrayClear(CArray cArray) {
@@ -88,8 +88,8 @@ void CArrayRemoveElement(CArray cArray, void *element) {
   if (cArray->releaser) cArray->releaser(element);
   int numLeft = --(cArray->count);
   char *eltByte = (char *)element;
-  ptrdiff_t byteDist = eltByte - cArray->elements;
-  int index = (int)(byteDist / cArray->elementSize);
+  int byteDist = eltByte - cArray->elements;
+  int index = byteDist / cArray->elementSize;
   if (index == numLeft) return;
   memmove(eltByte, eltByte + cArray->elementSize, (numLeft - index) * cArray->elementSize);
 }
@@ -103,7 +103,7 @@ void CArrayAddZeroedElements(CArray cArray, int numElements) {
     resizeNeeded = 1;
   }
   if (resizeNeeded) {
-    cArray->elements = realloc(cArray->elements, cArray->capacity * (int)cArray->elementSize);
+    cArray->elements = realloc(cArray->elements, cArray->capacity * cArray->elementSize);
   }
   void *bytesToZero = CArrayElement(cArray, cArray->count);
   memset(bytesToZero, 0, numElements * cArray->elementSize);

@@ -61,10 +61,10 @@ void CArrayAddZeroedElements(CArray cArray, int numElements);
 void *CArrayEnd(CArray cArray);
 
 #define CArrayFor(type, var, cArray) \
-for (type var = (type)CArrayElement(cArray, 0); var != CArrayEnd(cArray); ++var)
+for (type var = CArrayElement(cArray, 0); var != CArrayEnd(cArray); ++var)
 
 #define CArrayForBackwards(type, var, cArray) \
-for (type var = (type)CArrayElement(cArray, cArray->count - 1); var >= (type)cArray->elements; --var)
+for (type var = CArrayElement(cArray, cArray->count - 1); var >= (type)cArray->elements; --var)
 
 typedef int (*CompareFunction)(void *, const void *, const void *);
 void CArraySort(CArray cArray, CompareFunction compare, void *compareContext);
