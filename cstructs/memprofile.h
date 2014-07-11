@@ -1,6 +1,6 @@
 // memprofile.h
 //
-// Home repo: https://github.com/tylerneylon/cstructs
+// https://github.com/tylerneylon/cstructs
 //
 
 #pragma once

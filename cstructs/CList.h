@@ -1,6 +1,6 @@
 // CList.h
 //
-// Home repo: https://github.com/tylerneylon/cstructs
+// https://github.com/tylerneylon/cstructs
 //
 // C-based singly-linked list.
 // A NULL pointer is equivalent to an empty list.

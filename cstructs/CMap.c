@@ -1,6 +1,6 @@
 // CMap.c
 //
-// Home repo: https://github.com/tylerneylon/cstructs
+// https://github.com/tylerneylon/cstructs
 //
 // Internal structure:
 // An array of buckets of size s = 2^n, where n grows to keep

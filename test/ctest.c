@@ -1,6 +1,6 @@
 // ctest.c
 //
-// Home repo: https://github.com/tylerneylon/cstructs
+// https://github.com/tylerneylon/cstructs
 //
 // A minimalistic test framework.
 //

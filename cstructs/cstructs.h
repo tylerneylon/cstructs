@@ -1,6 +1,6 @@
 // cstructs.h
 //
-// Home repo: https://github.com/tylerneylon/cstructs
+// https://github.com/tylerneylon/cstructs
 //
 // Overall header for including CArray, CMap, and CList.
 // Friendly for linking with C++ sources.

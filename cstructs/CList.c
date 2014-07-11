@@ -1,6 +1,6 @@
 // CList.c
 //
-// Home repo: https://github.com/tylerneylon/cstructs
+// https://github.com/tylerneylon/cstructs
 //
 
 #include "CList.h"
