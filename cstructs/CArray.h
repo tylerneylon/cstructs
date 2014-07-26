@@ -66,7 +66,7 @@ void *CArrayEnd(CArray cArray);
 for (type var = (type)CArrayElement(cArray, 0); var != CArrayEnd(cArray); ++var)
 
 #define CArrayForBackwards(type, var, cArray) \
-for (type var = (type)CArrayElement(cArray, cArray->count - 1); var >= (type)cArray->elements; --var)
+for (type var = (type)CArrayElement(cArray, cArray->count - 1); cArray->count && var >= (type)cArray->elements; --var)
 
 typedef int (*CompareFunction)(void *, const void *, const void *);
 void CArraySort(CArray cArray, CompareFunction compare, void *compareContext);
