@@ -270,12 +270,24 @@ int test_edge_cases() {
   return test_success;
 }
 
+// Make sure that CArrayFor and CArrayForBackwards don't crash on an empty array.
+int test_empty_loops() {
+  CArray array = CArrayNew(0, sizeof(int));
+
+  // These might fail by crashing, so we don't need any test_* calls.
+  CArrayFor(int *, i, array);
+  CArrayForBackwards(int *, i, array);
+
+  return test_success;
+}
+
 int main(int argc, char **argv) {
   start_all_tests(argv[0]);
   run_tests(
     test_subarrays, test_int_array, test_releaser,
     test_clear, test_sort, test_remove, test_find,
-    test_indexof, test_string_array, test_edge_cases
+    test_indexof, test_string_array, test_edge_cases,
+    test_empty_loops
   );
   return end_all_tests();
 }
