@@ -6,8 +6,7 @@
 // A NULL pointer is equivalent to an empty list.
 //
 
-#ifndef __CLIST_H__
-#define __CLIST_H__
+#pragma once
 
 #include "CArray.h"
 
@@ -46,5 +45,3 @@ int CListCount(CList *list);
   for (type var = (type)(UNIQUE ? UNIQUE->element : NULL); \
       UNIQUE; \
       UNIQUE = UNIQUE->next, var = (type)(UNIQUE ? UNIQUE->element : NULL))
-
-#endif

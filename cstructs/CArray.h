@@ -8,8 +8,7 @@
 // support nesting of data structures.
 //
 
-#ifndef __CARRAY_H__
-#define __CARRAY_H__
+#pragma once
 
 #include <stdlib.h>
 
@@ -74,5 +73,3 @@ void CArraySort(CArray cArray, CompareFunction compare, void *compareContext);
 // Assumes the array is sorted in ascending memcmp order; does a memcmp of each element
 // in the array, using a binary search.
 void *CArrayFind(CArray cArray, void *elt);
-
-#endif
