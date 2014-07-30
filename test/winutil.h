@@ -12,7 +12,6 @@
 #include <windows.h>
 
 #include <malloc.h>
-#include <memory.h>
 #include <stdarg.h>
 #include <stdio.h>
 
@@ -93,7 +92,5 @@ static char *win_strerror(int err) {
   strerror_s(s, 256, err);
   return s;
 }
-
-#define memcpy(dst, src, n) memcpy_s(dst, n, src, n)
 
 #endif
