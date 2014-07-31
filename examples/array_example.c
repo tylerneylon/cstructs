@@ -35,15 +35,16 @@ int main() {
   CArrayRemoveElement(array, elt);  // Removes array[1].
 
   printf("Strings in the array:\n");
+
   // A for loop. The 2nd parameter = the iterator.
   // The first parameter = the type of the iterator =
   // a pointer to the type sent into CArrayNew.
-  CArrayFor(char **, str_ptr, array) {
-    printf("%s\n", *str_ptr);
+  CArrayFor(char **, str_ptr, array, index) {
+    printf("array[%d]=%s\n", index, *str_ptr);
   }
   // Prints out: hi what's up
 
-  // Delete every array created with CArrayNew.
+  // Call CArrayDelete on every array created with CArrayNew.
   CArrayDelete(array);
 
   return 0;

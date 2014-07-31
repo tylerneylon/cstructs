@@ -107,7 +107,7 @@ KeyValuePair *CMapFind(CMap map, void *needle) {
 void CMapClear(CMap map) {
   CMap oldMap = currentMap;
   currentMap = map;
-  CArrayFor(void **, elt_ptr, map->buckets) {
+  CArrayFor(void **, elt_ptr, map->buckets, index) {
     CList *list_ptr = (CList *)elt_ptr;
     CListDeleteAndRelease(list_ptr, ReleaseKeyValuePair);
   }
@@ -174,8 +174,7 @@ CList *BucketFind(CList *bucket, void *needle, Eq eq) {
 void DoubleSize(CMap map) {
   CArrayAddZeroedElements(map->buckets, map->buckets->count);
   int n = map->buckets->count;
-  int index = 0;
-  CArrayFor(CList *, bucket, map->buckets) {
+  CArrayFor(CList *, bucket, map->buckets, index) {
     CList *entry = bucket;
     while (*entry) {
       KeyValuePair *pair = (*entry)->element;
@@ -189,7 +188,6 @@ void DoubleSize(CMap map) {
       CList *newBucket = (CList *)CArrayElement(map->buckets, bucketIndex);
       CListInsert(newBucket, pair);
     }
-    ++index;
     // The last half of the list is all new; no need to look at it.
     if (index >= n / 2) break;
   }

@@ -56,15 +56,19 @@ void *elt = CArrayElement(array, 1);
 CArrayRemoveElement(array, elt);  // Removes array[1].
 
 printf("Strings in the array:\n");
+
 // A for loop. The 2nd parameter = the iterator.
 // The first parameter = the type of the iterator =
 // a pointer to the type sent into CArrayNew.
-CArrayFor(char **, str_ptr, array) {
-  printf("%s\n", *str_ptr);
+CArrayFor(char **, str_ptr, array, index) {
+  printf("array[%d]=%s\n", index, *str_ptr);
 }
-// Prints out: hi what's up
+// Prints out:
+// array[0]=hi
+// array[1]=what's
+// array[2]=up
 
-// Delete every array created with CArrayNew.
+// Call CArrayDelete on every array created with CArrayNew.
 CArrayDelete(array);
 ```
 
@@ -211,5 +215,3 @@ The following is an informal summary of the remaining functions:
   to the element itself (of type `void *`) rather than to the tail of the list.
 * `CListCount` - Returns the number of elements in the list; takes
   linear time.
-
-

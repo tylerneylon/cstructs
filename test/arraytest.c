@@ -15,14 +15,14 @@
 #define array_size(x) (sizeof(x) / sizeof(x[0]))
 
 void print_int_array(CArray int_array) {
-  CArrayFor(int *, i, int_array) {
+  CArrayFor(int *, i, int_array, idx) {
     test_printf("%d ", *i);
   }
   test_printf("\n");
 }
 
 void print_double_array(CArray double_array) {
-  CArrayFor(double *, d, double_array) {
+  CArrayFor(double *, d, double_array, i) {
     test_printf("%f ", *d);
   }
   test_printf("\n");
@@ -57,9 +57,8 @@ int test_int_array() {
 
   // Test out a for loop over the elements.
   int values[] = {1, 0, 0, 2, 3, 4, 5};
-  i = 0;
-  CArrayFor(int *, int_ptr, array) {
-    test_that(*int_ptr == values[i++]);
+  CArrayFor(int *, int_ptr, array, i) {
+    test_that(*int_ptr == values[i]);
   }
 
   CArrayDelete(array);
@@ -83,11 +82,9 @@ int test_subarrays() {
   }
 
   test_printf("Starting to print out subarrays.\n");
-  int i = 0;
-  CArrayFor(CArray, subarray, array) {
+  CArrayFor(CArray, subarray, array, i) {
     int elt = CArrayElementOfType(subarray, 2, int);
     test_that(elt == i * 5 + 2);
-    ++i;
     print_int_array(subarray);
   }
 
@@ -270,24 +267,47 @@ int test_edge_cases() {
   return test_success;
 }
 
-// Make sure that CArrayFor and CArrayForBackwards don't crash on an empty array.
+// Make sure that CArrayFor doesn't crash on an empty array.
 int test_empty_loops() {
   CArray array = CArrayNew(0, sizeof(int));
 
   // These might fail by crashing, so we don't need any test_* calls.
-  CArrayFor(int *, i, array);
-  CArrayForBackwards(int *, i, array);
+  CArrayFor(int *, i, array, idx);
+
+  return test_success;
+}
+
+// Make sure that a CArrayFor loop still works when the array it is
+// iterating over is growing.
+int test_loops_on_growing_arrays() {
+  CArray array = CArrayNew(0, sizeof(char));
+  for (char c = 'a'; c <= 'd'; ++c) CArrayAddElement(array, c);
+
+  // This is to check that c is always a valid pointer at the start
+  // of every loop iteration. This may be tricky to maintain when
+  // the contents of the array are reallocated due to new incoming elements.
+  CArrayFor(char *, c, array, i) {
+    size_t array_bytes = array->count * array->elementSize;
+    test_that(c >= array->elements && c < (array->elements + array_bytes));
+    if (i < 4) {
+      *(char *)CArrayNewElement(array) = 'x';
+      *(char *)CArrayNewElement(array) = 'y';
+    }
+  }
+
+  CArrayDelete(array);
 
   return test_success;
 }
 
 int main(int argc, char **argv) {
+  set_verbose(0);  // Set this to 1 for additional debugging output.
   start_all_tests(argv[0]);
   run_tests(
     test_subarrays, test_int_array, test_releaser,
     test_clear, test_sort, test_remove, test_find,
     test_indexof, test_string_array, test_edge_cases,
-    test_empty_loops
+    test_empty_loops, test_loops_on_growing_arrays
   );
   return end_all_tests();
 }

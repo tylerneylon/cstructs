@@ -53,19 +53,18 @@ int CArrayIndexOf(CArray cArray, void *element);
 void CArrayRemoveElement(CArray cArray, void *element);
 void CArrayAddZeroedElements(CArray cArray, int numElements);
 
-// Tools for nice iterations.
-// If you used sizeof(x) to set up the CArray, then the type for CArrayFor
-// is expected to be "x *" (a pointer to x).
+// Loop over an array.
+// Example: CArrayFor(item_type *, item_ptr, array, index) { /* loop body */ }
+// Think:   type item_ptr = &array[index];  // for each index in the array.
 
-void *CArrayEnd(CArray cArray);
-
-// The (type) casts in CArrayFor and CArrayForBackwards are required by C++.
-
-#define CArrayFor(type, var, cArray) \
-for (type var = (type)CArrayElement(cArray, 0); var != CArrayEnd(cArray); ++var)
-
-#define CArrayForBackwards(type, var, cArray) \
-for (type var = (type)CArrayElement(cArray, cArray->count - 1); cArray->count && var >= (type)cArray->elements; --var)
+// If you used sizeof(x) to set up the CArray, then the type for CArrayFor is
+// expected to be "x *" (a pointer to x). It is safe to continue or break, edit the
+// index, and to edit the array itself, although array changes - including *any*
+// additions at all - may invalidate item_ptr until the start of the next iteration.
+#define CArrayFor(type, item_ptr, array, index) \
+  for (int index = 0, __tmpvar = 1; __tmpvar--;) \
+  for (type item_ptr = (type)CArrayElement(array, index); index < array->count; item_ptr = (type)CArrayElement(array, ++index))
+// The (type) cast in CArrayFor is required by C++.
 
 typedef int (*CompareFunction)(void *, const void *, const void *);
 void CArraySort(CArray cArray, CompareFunction compare, void *compareContext);
