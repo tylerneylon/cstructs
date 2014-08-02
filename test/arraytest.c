@@ -300,6 +300,22 @@ int test_loops_on_growing_arrays() {
   return test_success;
 }
 
+// Make sure that CArrayFor's temporary variables don't leak in scope;
+// the fear is that something that's supposed to be defined only within
+// the inner loop of a CArrayFor may still be defined afterwards, which
+// could - if something is broken - cause a compile error here.
+int test_two_loops() {
+  CArray array = CArrayNew(0, sizeof(char));
+
+  CArrayFor(char *, c, array, i);
+  CArrayFor(char *, c, array, i);
+
+  CArrayDelete(array);
+
+  return test_success;
+}
+
+
 int main(int argc, char **argv) {
   set_verbose(0);  // Set this to 1 for additional debugging output.
   start_all_tests(argv[0]);
@@ -307,7 +323,8 @@ int main(int argc, char **argv) {
     test_subarrays, test_int_array, test_releaser,
     test_clear, test_sort, test_remove, test_find,
     test_indexof, test_string_array, test_edge_cases,
-    test_empty_loops, test_loops_on_growing_arrays
+    test_empty_loops, test_loops_on_growing_arrays,
+    test_two_loops
   );
   return end_all_tests();
 }
