@@ -124,7 +124,7 @@ KeyValuePair *CMapNext(CMap map, int *i, void **p) {
     entry = *(CList *)CArrayElement(map->buckets, *i);
   }
   if (entry == NULL && *i == (map->buckets->count - 1)) {
-    *p = (void *)(intptr_t)(1);  // A token non-NULL pointer to end the outer loops.
+    *p = (void *)(1);  // A token non-NULL pointer to end the outer loops.
     return NULL;
   }
   void *element = entry->element;
