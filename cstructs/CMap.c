@@ -115,31 +115,20 @@ void CMapClear(CMap map) {
   map->count = 0;
 }
 
-typedef struct {
-  int bucket;
-  CList entry;
-} Iterator;
-
-KeyValuePair *CMapBegin(CMap map, void **iterator) {
-  Iterator *it = (Iterator *)malloc(sizeof(Iterator));
-  *iterator = it;
-  it->bucket = -1;
-  it->entry = NULL;
-  return CMapNext(map, *iterator);
-}
-
-KeyValuePair *CMapNext(CMap map, void *iterator) {
-  Iterator *it = (Iterator *)iterator;
-  while (it->entry == NULL && it->bucket < (map->buckets->count - 1)) {
-    it->bucket++;
-    it->entry = *(CList *)CArrayElement(map->buckets, it->bucket);
+KeyValuePair *CMapNext(CMap map, int *i, void **p) {
+  // *i is the bucket index.
+  // *p is the CList entry in that bucket.
+  CList entry = (CList)(*p);
+  while (entry == NULL && *i < (map->buckets->count - 1)) {
+    (*i)++;
+    entry = *(CList *)CArrayElement(map->buckets, *i);
   }
-  if (it->entry == NULL && it->bucket == (map->buckets->count - 1)) {
-    free(it);
+  if (entry == NULL && *i == (map->buckets->count - 1)) {
+    *p = (void *)(intptr_t)(1);  // A token non-NULL pointer to end the outer loops.
     return NULL;
   }
-  void *element = it->entry->element;
-  it->entry = it->entry->next;
+  void *element = entry->element;
+  *p = (void *)entry->next;
   return element;
 }
 

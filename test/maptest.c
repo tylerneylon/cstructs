@@ -207,9 +207,19 @@ int test_delete_in_for() {
   return test_success;
 }
 
+int test_empty_loop() {
+  CMap map = CMapNew(hash, eq);
+
+  CMapFor(pair, map);
+
+  CMapDelete(map);
+
+  return test_success;
+}
+
 int main(int argc, char **argv) {
   start_all_tests(argv[0]);
   run_tests(test_cmap, test_unset, test_clear,
-            test_delete_in_for);
+            test_delete_in_for, test_empty_loop);
   return end_all_tests();
 }

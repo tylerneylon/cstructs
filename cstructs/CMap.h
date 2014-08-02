@@ -43,18 +43,12 @@ KeyValuePair *CMapFind   (CMap map, void *needle);
 
 void          CMapClear  (CMap map);
 
-// These are for use with CMapFor.
-KeyValuePair *CMapBegin  (CMap map, void **iterator);
-KeyValuePair *CMapNext   (CMap map, void *iterator);
-
-// These macros are to be able to get a unique token within other macros.
-// See http://stackoverflow.com/questions/1597007/
-#define TOKENPASTE(x, y) x ## y
-#define TOKENPASTE2(x, y) TOKENPASTE(x, y)
-#define UNIQUE TOKENPASTE2(unique, __LINE__)
+// This is for use with CMapFor.
+KeyValuePair *CMapNext   (CMap map, int *i, void **p);
 
 // The variable var has type KeyValuePair *.
 #define CMapFor(var, map) \
-  void *UNIQUE; \
-  for (KeyValuePair *var = CMapBegin(map, &UNIQUE); \
-       var; var = CMapNext(map, UNIQUE))
+  for (int    __tmp_i = -1  ; __tmp_i == -1  ;) \
+  for (void * __tmp_p = NULL; __tmp_p == NULL;) \
+  for (KeyValuePair *var = CMapNext(map, &__tmp_i, &__tmp_p); \
+       var; var = CMapNext(map, &__tmp_i, &__tmp_p))
