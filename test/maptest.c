@@ -8,6 +8,7 @@
 #include "ctest.h"
 
 #include <stdlib.h>
+#include <stdio.h>
 #include <string.h>
 
 #include "winutil.h"
@@ -217,9 +218,33 @@ int test_empty_loop() {
   return test_success;
 }
 
+int test_releasers() {
+  CMap map = CMapNew(hash, eq);
+  num_free_calls = 0;
+  map->keyReleaser = free_with_counter;
+
+  for (int i = 0; i < 10; ++i) {
+    char *str_key;
+    asprintf(&str_key, "%d", i % 3);
+    CMapSet(map, str_key, (void *)1L);
+  }
+
+  // There are 3 active keys, and 10 allocated by asprintf,
+  // so 7 should have been released by now.
+  test_that(num_free_calls == 7);
+
+  CMapDelete(map);
+
+  test_that(num_free_calls == 10);
+
+  return test_success;
+}
+
 int main(int argc, char **argv) {
+  set_verbose(0);  // Set this to 1 while debugging a test.
   start_all_tests(argv[0]);
   run_tests(test_cmap, test_unset, test_clear,
-            test_delete_in_for, test_empty_loop);
+            test_delete_in_for, test_empty_loop,
+            test_releasers);
   return end_all_tests();
 }
