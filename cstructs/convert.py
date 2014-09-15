@@ -20,6 +20,22 @@ array_repls = [[r'CArrayInit', r'array__init'],
 # TODO The above list is badly incomplete. Complete it!
 #      Also avoid CArray -> Array in general; check for word boundaries.
 
+first_word = True
+
+def lowermatch(match):
+  global first_word
+  prefix = '__' if first_word else '_'
+  ret = prefix + match.group(0).lower()
+  first_word = False
+  return ret
+
+# Use this function as in:
+#   line = re.sub(<my re>, from_camel_case, line)
+def from_camel_case(match):
+  global first_word
+  first_word = True
+  return re.sub(r'\B[A-Z]', lowermatch, match.group(0)[1:]).lower()
+
 def convert_line(line):
   for repl in array_repls:
     line = re.sub(repl[0], repl[1], line)
