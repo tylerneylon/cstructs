@@ -12,13 +12,22 @@ import sys
 
 # These are ordered so, when old name A is a substring
 # of old name B, then A appears later in the list than B.
-array_repls = [[r'CArrayInit', r'array__init'],
-               [r'CArrayClear', r'array__clear'],
-               [r'CArrayRelease', r'array__release'],
-               [r'CArrayDelete', r'array__delete'],
-               [r'CArray', r'Array']]
-# TODO The above list is badly incomplete. Complete it!
-#      Also avoid CArray -> Array in general; check for word boundaries.
+# Thanks to the from_camel_case function below, we need
+# only list nontrivially renamed functions here.
+array_repls = [
+               [r'CArrayStruct',              r'ArrayStruct'],
+               [r'CArray.h',                  r'array.h'],
+               [r'elementSize',               r'item_size'],
+               [r'elements',                  r'items'],
+               [r'CompareFunction',           r'array__CompareFunction'],
+               [r'CArrayElementOfType',       r'array__item_val'],
+               [r'CArrayElement',             r'array__item_ptr'],
+               [r'CArrayAddElementByPointer', r'array__add_item_ptr'],
+               [r'CArrayAddElement',          r'array__add_item_val'],
+               [r'CArrayAppendContents',      r'array__append_array'],
+               [r'CArrayNewElement',          r'array__new_item_ptr'],
+               [r'CArrayRemoveElement',       r'array__remove_item'],
+               [r'CArrayAddZeroedElements',   r'array__add_zeroed_items']]
 
 first_word = True
 
@@ -39,6 +48,8 @@ def from_camel_case(match):
 def convert_line(line):
   for repl in array_repls:
     line = re.sub(repl[0], repl[1], line)
+  line = re.sub(r'CArray[A-Z]\w*', from_camel_case, line)
+  line = re.sub(r'\bCArray\b', r'Array', line)
   return line
 
 if __name__ == '__main__':
