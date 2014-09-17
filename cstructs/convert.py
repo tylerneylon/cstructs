@@ -10,6 +10,22 @@ import os
 import re
 import sys
 
+first_word = True
+
+def lowermatch(match):
+  global first_word
+  prefix = '__' if first_word else '_'
+  ret = prefix + match.group(0).lower()
+  first_word = False
+  return ret
+
+# Use this function as in:
+#   line = re.sub(<my re>, from_camel_case, line)
+def from_camel_case(match):
+  global first_word
+  first_word = True
+  return re.sub(r'\B[A-Z]', lowermatch, match.group(0)[1:]).lower()
+
 # These are ordered so, when old name A is a substring
 # of old name B, then A appears later in the list than B.
 # Thanks to the from_camel_case function below, we need
@@ -27,29 +43,19 @@ array_repls = [
                [r'CArrayAppendContents',      r'array__append_array'],
                [r'CArrayNewElement',          r'array__new_item_ptr'],
                [r'CArrayRemoveElement',       r'array__remove_item'],
-               [r'CArrayAddZeroedElements',   r'array__add_zeroed_items']]
+               [r'CArrayAddZeroedElements',   r'array__add_zeroed_items'],
+               [r'CArray[A-Z]\w*',            from_camel_case],
+               [r'\bCArray\b',                r'Array']]
 
-first_word = True
-
-def lowermatch(match):
-  global first_word
-  prefix = '__' if first_word else '_'
-  ret = prefix + match.group(0).lower()
-  first_word = False
-  return ret
-
-# Use this function as in:
-#   line = re.sub(<my re>, from_camel_case, line)
-def from_camel_case(match):
-  global first_word
-  first_word = True
-  return re.sub(r'\B[A-Z]', lowermatch, match.group(0)[1:]).lower()
+list_repls = [
+              [r'CListStruct', r'ListStruct'],
+              [r'CList.h',     r'list.h'],
+              [r'CList[A-Z]\w*', from_camel_case],
+              [r'\bCList\b', r'List']]
 
 def convert_line(line):
-  for repl in array_repls:
-    line = re.sub(repl[0], repl[1], line)
-  line = re.sub(r'CArray[A-Z]\w*', from_camel_case, line)
-  line = re.sub(r'\bCArray\b', r'Array', line)
+  for repl in array_repls: line = re.sub(repl[0], repl[1], line)
+  for repl in  list_repls: line = re.sub(repl[0], repl[1], line)
   return line
 
 if __name__ == '__main__':
