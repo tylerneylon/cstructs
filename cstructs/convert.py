@@ -53,9 +53,24 @@ list_repls = [
               [r'CList[A-Z]\w*', from_camel_case],
               [r'\bCList\b', r'List']]
 
+map_repls = [
+             [r'CMapStruct',        r'MapStruct'],
+             [r'CMap.h',            r'map.h'],
+             [r'\bHash\b',          r'map__Hash'],
+             [r'\bEq\b',            r'map__Eq'],
+             [r'\bAlloc\b',         r'map__Alloc'],
+             [r'\bkeyReleaser\b',   r'key_releaser'],
+             [r'\bvalueReleaser\b', r'value_releaser'],
+             [r'\bpairAlloc\b',     r'pair_alloc'],
+             [r'\bKeyValuePair\b',  r'map__key_value'],
+             [r'CMap[A-Z]\w*',      from_camel_case],
+             [r'\bCMap\b',          r'Map']]
+
+
 def convert_line(line):
-  for repl in array_repls: line = re.sub(repl[0], repl[1], line)
-  for repl in  list_repls: line = re.sub(repl[0], repl[1], line)
+  for repl_list in [array_repls, list_repls, map_repls]:
+    for repl in repl_list:
+      line = re.sub(repl[0], repl[1], line)
   return line
 
 if __name__ == '__main__':
