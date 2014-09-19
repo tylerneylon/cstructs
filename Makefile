@@ -17,7 +17,7 @@
 
 # Target lists.
 tests = $(addprefix out/,arraytest listtest maptest)
-obj = $(addprefix out/,array.o list.o CArray.o CList.o CMap.o memprofile.o ctest.o)
+obj = $(addprefix out/,array.o list.o map.o CArray.o CList.o CMap.o memprofile.o ctest.o)
 examples = $(addprefix out/,array_example map_example list_example)
 
 # Variables for build settings.
