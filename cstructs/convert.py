@@ -48,10 +48,10 @@ array_repls = [
                [r'\bCArray\b',                r'Array']]
 
 list_repls = [
-              [r'CListStruct', r'ListStruct'],
-              [r'CList.h',     r'list.h'],
+              [r'CListStruct',   r'ListStruct'],
+              [r'CList.h',       r'list.h'],
               [r'CList[A-Z]\w*', from_camel_case],
-              [r'\bCList\b', r'List']]
+              [r'\bCList\b',     r'List']]
 
 map_repls = [
              [r'CMapStruct',        r'MapStruct'],
