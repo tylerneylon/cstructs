@@ -35,12 +35,12 @@ void  array__release (void *array);  // Clears array and frees all capacity; doe
 void  array__delete  (Array array);  // Releases array and frees array itself.
 
 void *  array__item_ptr(Array array, int index);
-#define array__item_val(array, i, type) (*(type *)array__item(array, i))
+#define array__item_val(array, i, type) (*(type *)array__item_ptr(array, i))
 
 // Amortized constant-time operations (usually constant-time, sometimes linear).
 
 void    array__add_item_ptr (Array array, void *item);
-#define array__add_item_val(a, i) array__add_item_by_ptr(a, &i);
+#define array__add_item_val(a, i) array__add_item_ptr(a, &i);
 void *  array__new_item_ptr (Array array);
 #define array__new_item_val(a, type) (*(type *)array__new_item_ptr(a))
 

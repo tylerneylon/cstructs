@@ -14,15 +14,15 @@
 
 #define array_size(x) (sizeof(x) / sizeof(x[0]))
 
-void print_int_array(CArray int_array) {
-  CArrayFor(int *, i, int_array, idx) {
+void print_int_array(Array int_array) {
+  array__for(int *, i, int_array, idx) {
     test_printf("%d ", *i);
   }
   test_printf("\n");
 }
 
-void print_double_array(CArray double_array) {
-  CArrayFor(double *, d, double_array, i) {
+void print_double_array(Array double_array) {
+  array__for(double *, d, double_array, i) {
     test_printf("%f ", *d);
   }
   test_printf("\n");
@@ -30,65 +30,65 @@ void print_double_array(CArray double_array) {
 
 // Test out an array of direct ints.
 int test_int_array() {
-  CArray array = CArrayNew(0, sizeof(int));
+  Array array = array__new(0, sizeof(int));
   test_that(array->count == 0);
 
   int i = 1;
-  CArrayAddElement(array, i);  // array is now [1].
-  test_that(CArrayElementOfType(array, 0, int) == 1);
+  array__add_item_val(array, i);  // array is now [1].
+  test_that(array__item_val(array, 0, int) == 1);
   test_that(array->count == 1);
 
-  CArrayAddZeroedElements(array, 2);  // array is now [1, 0, 0].
-  test_that(CArrayElementOfType(array, 2, int) == 0);
+  array__add_zeroed_items(array, 2);  // array is now [1, 0, 0].
+  test_that(array__item_val(array, 2, int) == 0);
   test_that(array->count == 3);
 
   // Test out appending another array.
-  CArray other_array = CArrayNew(4, sizeof(int));
+  Array other_array = array__new(4, sizeof(int));
   int other_ints[] = {2, 3, 4, 5};
-  for (i = 0; i < 4; ++i) CArrayAddElement(other_array, other_ints[i]);
+  for (i = 0; i < 4; ++i) array__add_item_val(other_array, other_ints[i]);
   test_printf("other_array has contents:\n");
   print_int_array(other_array);
-  CArrayAppendContents(array, other_array);
+  array__append_array(array, other_array);
   test_printf("Just after append, array is:\n");
   print_int_array(array);
-  CArrayDelete(other_array);
+  array__delete(other_array);
   test_that(array->count == 7);
-  test_that(CArrayElementOfType(array, 5, int) == 4);
+  test_that(array__item_val(array, 5, int) == 4);
 
-  // Test out a for loop over the elements.
+  // Test out a for loop over the items.
   int values[] = {1, 0, 0, 2, 3, 4, 5};
-  CArrayFor(int *, int_ptr, array, i) {
+  array__for(int *, int_ptr, array, i) {
     test_that(*int_ptr == values[i]);
   }
 
-  CArrayDelete(array);
+  array__delete(array);
 
   return test_success;
 }
 
 // This tests a pattern using an array of arrays of ints.
 int test_subarrays() {
-  CArray array = CArrayNew(16, sizeof(CArrayStruct));
-  array->releaser = CArrayRelease;
+  Array array = array__new(16, sizeof(ArrayStruct));
+  array->releaser = array__release;
 
   for (int i = 0; i < 10; ++i) {
-    CArray subarray = CArrayInit(CArrayNewElement(array), 16, sizeof(int));
+    Array subarray = array__init(array__new_item_ptr(array), 16, sizeof(int));
     test_printf("subarray = %p\n", subarray);
     for (int j = 0; j < 5; ++j) {
       int newInt = j + i * 5;
-      CArrayAddElement(subarray, newInt);
+      array__add_item_val(subarray, newInt);
     }
     print_int_array(subarray);
   }
 
   test_printf("Starting to print out subarrays.\n");
-  CArrayFor(CArray, subarray, array, i) {
-    int elt = CArrayElementOfType(subarray, 2, int);
+  array__for(Array, subarray, array, i) {
+    int elt = array__item_val(subarray, 2, int);
     test_that(elt == i * 5 + 2);
     print_int_array(subarray);
   }
 
-  CArrayDelete(array);
+  array__delete(array);
 
   return test_success;
 }
@@ -101,14 +101,14 @@ void counting_releaser(void *element) {
 
 int test_releaser() {
   const int num_elts = 32;
-  CArray array = CArrayNew(64, sizeof(int));
+  Array array = array__new(64, sizeof(int));
   array->releaser = counting_releaser;
 
   for (int i = 0; i < num_elts; ++i) {
-    CArrayAddElementByPointer(array, &i);
+    array__add_item_ptr(array, &i);
   }
 
-  CArrayDelete(array);
+  array__delete(array);
 
   test_printf("num_releaser_calls=%d.\n", num_releaser_calls);
   test_that(num_releaser_calls == num_elts);
@@ -117,14 +117,14 @@ int test_releaser() {
 }
 
 int test_clear() {
-  CArray array = CArrayNew(0, sizeof(double));
+  Array array = array__new(0, sizeof(double));
   double values[] = {1.0, 2.0, 3.14};
-  for (int i = 0; i < array_size(values); ++i) CArrayAddElement(array, values[i]);
+  for (int i = 0; i < array_size(values); ++i) array__add_item_val(array, values[i]);
   test_that(array->count == 3);
-  test_that(CArrayElementOfType(array, 2, double) == 3.14);
-  CArrayClear(array);
+  test_that(array__item_val(array, 2, double) == 3.14);
+  array__clear(array);
   test_that(array->count == 0);
-  CArrayDelete(array);
+  array__delete(array);
   return test_success;
 }
 
@@ -137,59 +137,59 @@ int compare_doubles(void *context, const void *elt1, const void *elt2) {
 }
 
 int test_sort() {
-  CArray array = CArrayNew(0, sizeof(double));
+  Array array = array__new(0, sizeof(double));
   double values[] = {-1.2, 2.4, 3.1, 0.0, -2.2};
-  for (int i = 0; i < array_size(values); ++i) CArrayAddElement(array, values[i]);
+  for (int i = 0; i < array_size(values); ++i) array__add_item_val(array, values[i]);
   test_that(array->count == 5);
-  test_that(CArrayElementOfType(array, 2, double) == 3.1);
+  test_that(array__item_val(array, 2, double) == 3.1);
   test_printf("Before sorting, array is:\n");
   print_double_array(array);
-  CArraySort(array, compare_doubles, NULL);
+  array__sort(array, compare_doubles, NULL);
   test_printf("After sorting, array is:\n");
   print_double_array(array);
-  test_that(CArrayElementOfType(array, 0, double) == -2.2);
-  test_that(CArrayElementOfType(array, 1, double) == -1.2);
-  CArrayDelete(array);
+  test_that(array__item_val(array, 0, double) == -2.2);
+  test_that(array__item_val(array, 1, double) == -1.2);
+  array__delete(array);
   return test_success;
 }
 
 int test_remove() {
-  CArray array = CArrayNew(0, sizeof(double));
+  Array array = array__new(0, sizeof(double));
   double values[] = {2.0, 3.0, 5.0, 7.0};
-  for (int i = 0; i < array_size(values); ++i) CArrayAddElement(array, values[i]);
+  for (int i = 0; i < array_size(values); ++i) array__add_item_val(array, values[i]);
   test_that(array->count == 4);
 
-  double *element = CArrayElement(array, 2);
+  double *element = array__item_ptr(array, 2);
   test_that(*element == 5.0);
 
   test_printf("About to call remove element.\n");
-  CArrayRemoveElement(array, element);
+  array__remove_item(array, element);
   test_that(array->count == 3);
-  test_that(CArrayElementOfType(array, 2, double) == 7.0);
-  CArrayDelete(array);
+  test_that(array__item_val(array, 2, double) == 7.0);
+  array__delete(array);
   return test_success;
 }
 
 int test_indexof() {
-  CArray array = CArrayNew(0, sizeof(double));
+  Array array = array__new(0, sizeof(double));
   double values[] = {2.0, 3.0, 5.0, 7.0};
-  for (int i = 0; i < array_size(values); ++i) CArrayAddElement(array, values[i]);
+  for (int i = 0; i < array_size(values); ++i) array__add_item_val(array, values[i]);
   test_that(array->count == 4);
 
-  double *element = CArrayElement(array, 2);
+  double *element = array__item_ptr(array, 2);
   test_that(*element == 5.0);
 
-  test_that(CArrayIndexOf(array, element) == 2);
+  test_that(array__index_of(array, element) == 2);
 
   --element;
-  test_that(CArrayIndexOf(array, element) == 1);
+  test_that(array__index_of(array, element) == 1);
 
-  CArrayDelete(array);
+  array__delete(array);
 
   return test_success;
 }
 
-// Test the find functionality; we need to sort elements in memcmp order for find to work.
+// Test the find functionality; we need to sort items in memcmp order for find to work.
 int mem_compare(void *context, const void *elt1, const void *elt2) {
   return memcmp(elt1, elt2, *(size_t *)context);
 }
@@ -197,120 +197,120 @@ int mem_compare(void *context, const void *elt1, const void *elt2) {
 int test_find() {
   size_t element_size = sizeof(double);
 
-  CArray array = CArrayNew(0, element_size);
+  Array array = array__new(0, element_size);
   double values[] = {2.0, 3.0, 5.0, 7.0};
-  for (int i = 0; i < array_size(values); ++i) CArrayAddElement(array, values[i]);
+  for (int i = 0; i < array_size(values); ++i) array__add_item_val(array, values[i]);
   test_that(array->count == 4);
 
-  CArraySort(array, mem_compare, &element_size);
+  array__sort(array, mem_compare, &element_size);
 
-  void *element = CArrayFind(array, &values[1]);
+  void *element = array__find(array, &values[1]);
   test_that(*(double *)element == values[1]);
 
-  CArrayDelete(array);
+  array__delete(array);
 
   return test_success;
 }
 
 int test_string_array() {
-  CArray array = CArrayNew(4, sizeof(char *));
+  Array array = array__new(4, sizeof(char *));
 
   // A nice way to add string literals.
-  *(char **)CArrayNewElement(array) = "one";
-  *(char **)CArrayNewElement(array) = "two";
+  array__new_item_val(array, char *) = "one";
+  array__new_item_val(array, char *) = "two";
 
   // A nice way to allocate & store runtime-created strings.
-  asprintf((char **)CArrayNewElement(array), "thr%s", "ee");
+  asprintf((char **)array__new_item_ptr(array), "thr%s", "ee");
 
   // Note that if you mix the above methods, then you'll have
   // to be very careful about freeing the strings made by
   // asprintf but not the literals; therefore it's easier to
   // avoid mixing them!
 
-  test_that(strcmp(CArrayElementOfType(array, 0, char *), "one") == 0);
+  test_that(strcmp(array__item_val(array, 0, char *), "one") == 0);
 
-  char *s = CArrayElementOfType(array, 2, char *);
+  char *s = array__item_val(array, 2, char *);
   test_that(strcmp(s, "three") == 0);
   free(s);
 
-  CArrayDelete(array);
+  array__delete(array);
 
   return test_success;
 }
 
 int test_edge_cases() {
-  CArray array = CArrayNew(0, sizeof(char));
-  for (char c = 'a'; c <= 'z'; ++c) CArrayAddElement(array, c);
-  test_that(CArrayElementOfType(array, 2, char) == 'c');
-  CArrayDelete(array);
+  Array array = array__new(0, sizeof(char));
+  for (char c = 'a'; c <= 'z'; ++c) array__add_item_val(array, c);
+  test_that(array__item_val(array, 2, char) == 'c');
+  array__delete(array);
 
-  array = CArrayNew(8, sizeof(int));
+  array = array__new(8, sizeof(int));
   int values[] = {1, 3, 5, 7};
-  for (int i = 0; i < array_size(values); ++i) CArrayAddElement(array, values[i]);
+  for (int i = 0; i < array_size(values); ++i) array__add_item_val(array, values[i]);
   test_that(array->count == 4);
 
   size_t element_size = sizeof(int);
-  CArraySort(array, mem_compare, &element_size);
-  CArrayRemoveElement(array, CArrayElement(array, 3));
+  array__sort(array, mem_compare, &element_size);
+  array__remove_item(array, array__item_ptr(array, 3));
   test_that(array->count == 3);
-  CArrayRemoveElement(array, CArrayElement(array, 2));
+  array__remove_item(array, array__item_ptr(array, 2));
   test_that(array->count == 2);
-  CArrayRemoveElement(array, CArrayElement(array, 0));
+  array__remove_item(array, array__item_ptr(array, 0));
   test_that(array->count == 1);
-  test_that(CArrayElementOfType(array, 0, int) == 3);
-  CArrayRemoveElement(array, CArrayElement(array, 0));
+  test_that(array__item_val(array, 0, int) == 3);
+  array__remove_item(array, array__item_ptr(array, 0));
   test_that(array->count == 0);
-  CArrayClear(array);  // Expected to do nothing, since array is empty.
+  array__clear(array);  // Expected to do nothing, since array is empty.
 
-  CArrayDelete(array);
+  array__delete(array);
 
   return test_success;
 }
 
-// Make sure that CArrayFor doesn't crash on an empty array.
+// Make sure that array__for doesn't crash on an empty array.
 int test_empty_loops() {
-  CArray array = CArrayNew(0, sizeof(int));
+  Array array = array__new(0, sizeof(int));
 
   // These might fail by crashing, so we don't need any test_* calls.
-  CArrayFor(int *, i, array, idx);
+  array__for(int *, i, array, idx);
 
   return test_success;
 }
 
-// Make sure that a CArrayFor loop still works when the array it is
+// Make sure that a array__for loop still works when the array it is
 // iterating over is growing.
 int test_loops_on_growing_arrays() {
-  CArray array = CArrayNew(0, sizeof(char));
-  for (char c = 'a'; c <= 'd'; ++c) CArrayAddElement(array, c);
+  Array array = array__new(0, sizeof(char));
+  for (char c = 'a'; c <= 'd'; ++c) array__add_item_val(array, c);
 
   // This is to check that c is always a valid pointer at the start
   // of every loop iteration. This may be tricky to maintain when
-  // the contents of the array are reallocated due to new incoming elements.
-  CArrayFor(char *, c, array, i) {
-    size_t array_bytes = array->count * array->elementSize;
-    test_that(c >= array->elements && c < (array->elements + array_bytes));
+  // the contents of the array are reallocated due to new incoming items.
+  array__for(char *, c, array, i) {
+    size_t array_bytes = array->count * array->item_size;
+    test_that(c >= array->items && c < (array->items + array_bytes));
     if (i < 4) {
-      *(char *)CArrayNewElement(array) = 'x';
-      *(char *)CArrayNewElement(array) = 'y';
+      *(char *)array__new_item_ptr(array) = 'x';
+      *(char *)array__new_item_ptr(array) = 'y';
     }
   }
 
-  CArrayDelete(array);
+  array__delete(array);
 
   return test_success;
 }
 
-// Make sure that CArrayFor's temporary variables don't leak in scope;
+// Make sure that array__for's temporary variables don't leak in scope;
 // the fear is that something that's supposed to be defined only within
-// the inner loop of a CArrayFor may still be defined afterwards, which
+// the inner loop of a array__for may still be defined afterwards, which
 // could - if something is broken - cause a compile error here.
 int test_two_loops() {
-  CArray array = CArrayNew(0, sizeof(char));
+  Array array = array__new(0, sizeof(char));
 
-  CArrayFor(char *, c, array, i);
-  CArrayFor(char *, c, array, i);
+  array__for(char *, c, array, i);
+  array__for(char *, c, array, i);
 
-  CArrayDelete(array);
+  array__delete(array);
 
   return test_success;
 }

@@ -50,6 +50,7 @@ array_repls = [
 list_repls = [
               [r'CListStruct',   r'ListStruct'],
               [r'CList.h',       r'list.h'],
+              [r'->element\b',   r'->item'],
               [r'CList[A-Z]\w*', from_camel_case],
               [r'\bCList\b',     r'List']]
 
