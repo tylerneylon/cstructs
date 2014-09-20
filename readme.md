@@ -1,30 +1,30 @@
-# CStructs
+# cstructs
 
 *Efficient low-level containers in pure C.*
 
 ## Purpose
 
-CStructs is a small, efficient set of interfaces that
+cstructs is a small, efficient set of interfaces that
 act like container classes; they are technically not classes
 as classes don't exist in pure C.
 
-The primary structures are `CArray` and `CMap`.
+The primary structures are `Array` and `Map`.
 
-A `CArray` is like an javascript array or a Python list. It is
-always a contiguous block of elements that are tightly-packed in
-memory. Elements are passed with the type `void *`, and can either
+A `Array` is like a JavaScript array or a Python list. It is
+always a contiguous block of items that are tightly-packed in
+memory. Items are passed with the type `void *`, and can either
 be actual pointers, or direct values cast into the `void *` type.
 
-A `CMap` is like a javascript object or a Python dictionary.
+A `Map` is like a JavaScript object or a Python dictionary.
 It's a hash table with arbitrary key and value types which are
 passed around with `void *` pointers; again, direct values are
 supported. You are responsible for providing hash
 and equality functions for the keys.
 
-The interfaces in CStructs are designed to simplify memory
+The interfaces in cstructs are designed to simplify memory
 management and to support nested memory-managed structures.
 
-## Using `CArray`
+## Using `Array`
 
 Here's an example use:
 
@@ -32,35 +32,35 @@ Here's an example use:
 // Set up and use an array of strings.
 
 // 16 is the initial capacity;
-// sizeof(char *) indicates a single element is a char *.
-CArray array = CArrayNew(16, sizeof(char *));
+// sizeof(char *) indicates a single item is a char *.
+Array array = array__new(16, sizeof(char *));
 
 char *strs[4] = {"hi", "there", "what's", "up"};
 for (int i = 0; i < 4; ++i) {
 
-  // Append an element to the end of the array.
-  // The element should have the type sent in to CArrayNew via sizeof,
+  // Append an item to the end of the array.
+  // The item should have the type sent in to array__new via sizeof,
   // and cannot be a literal as it's dereferenced and passed as a pointer.
-  CArrayAddElement(array, strs[i]);
+  array__add_item_val(array, strs[i]);
 }
 
 // This intuitively means s = array[1];
-char *s = CArrayElementOfType(array, 1, char *);
+char *s = array__item_val(array, 1, char *);
 
-// This intuitively means elt = array + 1; elt points into the array.
-// We have *elt == s.
-void *elt = CArrayElement(array, 1);
+// This intuitively means item = array + 1; item points into the array.
+// We have *item == s.
+void *item = array__item_ptr(array, 1);
 
-// This function expects elt to point directly into the array.
+// This function expects item to point directly into the array.
 // This fails if we send in s since s is a value, not a pointer to a value.
-CArrayRemoveElement(array, elt);  // Removes array[1].
+array__remove_item(array, item);  // Removes array[1].
 
 printf("Strings in the array:\n");
 
 // A for loop. The 2nd parameter = the iterator.
 // The first parameter = the type of the iterator =
-// a pointer to the type sent into CArrayNew.
-CArrayFor(char **, str_ptr, array, index) {
+// a pointer to the type sent into array__new.
+array__for(char **, str_ptr, array, index) {
   printf("array[%d]=%s\n", index, *str_ptr);
 }
 // Prints out:
@@ -68,33 +68,39 @@ CArrayFor(char **, str_ptr, array, index) {
 // array[1]=what's
 // array[2]=up
 
-// Call CArrayDelete on every array created with CArrayNew.
-CArrayDelete(array);
+// Call array__delete on every array created with array__new.
+array__delete(array);
 ```
 
-Other functions are described in `CArray.h`. See that header
+Other functions are described in `array.h`. See that header
 file for more complete descriptions.
+
+An `Array` struct contains a function pointer called its *releaser*
+which, if set, is called when any item is removed. This simplifies
+memory management and enables the use of nested containers.
+The standard `free` function can be assigned as an `Array`'s
+releaser.
 
 The following is an informal summary of the remaining functions:
 
-* `CArrayInit` - Similar to `CArrayNew`, but operates on an array
+* `array__init` - Similar to `array__new`, but operates on an array
   whose memory has already been allocated; this is useful for nesting
   arrays within arrays.
-* `CArrayRelease` - A counterpart to `CArrayInit`, this frees all dynamic
+* `array__release` - A counterpart to `array__init`, this frees all dynamic
   storage of the array, but does not free the array container itself; also
   useful for working with arrays nested in arrays.
-* `CArrayClear` - Sets an array's element count to zero.
-* `CArrayAddZeroedElements` - Quickly add an arbitrary number of all-zero elements.
-* `CArrayAddElementByPointer` - An alternative to `CArrayAddElement` that's useful
+* `array__clear` - Sets an array's item count to zero.
+* `array__add_zeroed_items` - Quickly add an arbitrary number of all-zero items.
+* `array__add_item_ptr` - An alternative to `array__add_item_val` that's useful
   when having a parameter dereferenced is inconvenient; e.g. if you already have
   a pointer.
-* `CArraySort` - Sort the array elements using a custom compare function that
+* `array__sort` - Sort the array items using a custom compare function that
   you provide.
-* `CArrayFind` - Performs a binary search on the array; assumes it is already
+* `array__find` - Performs a binary search on the array; assumes it is already
   sorted in `memcmp`-order (note that `memcmp` order may not match your custom
-  comparison sort used for `CArraySort`).
+  comparison sort used for `array__sort`).
 
-## Using `CMap`
+## Using `Map`
 
 Here's an example use:
 
@@ -118,100 +124,110 @@ int eq(void *str_void_ptr1, void *str_void_ptr2) {
 }
 
 void use_map() {
-  CMap map = CMapNew(hash, eq);
+  Map map = map__new(hash, eq);
 
-  // This adds a KeyValuePair pointing directly to the passed in
+  // This adds a map__key_value pointing directly to the passed in
   // literal "abc", and another pointer with value 0x1, which is
   // cast from the long integer type of 1L.
   // The cast is how we can directly store primitives instead of
   // pointers to other objects; this use is supported by the library.
-  CMapSet(map, "abc", (void *)1L);
-  CMapSet(map, "xyz", (void *)2L);
+  map__set(map, "abc", (void *)1L);
+  map__set(map, "xyz", (void *)2L);
 
   // We can lookup any key in expected constant time.
-  KeyValuePair *pair = CMapFind(map, "rgb");
+  map__key_value *pair = map__find(map, "rgb");
   // Now pair == NULL, since "rgb" is not a key in our map.
 
   // This looks up and prints out the value 2 for the key "xyz".
-  pair = CMapFind(map, "xyz");
+  pair = map__find(map, "xyz");
   printf("pair->value=%ld\n", (long)pair->value);
 
   // Print out the entire map. The result is:
   // abc -> 1
   // xyz -> 2
   // ... although the lines may appear in any order.
-  CMapFor(pair, map) {
+  map__for(pair, map) {
     printf("%s -> %ld\n", pair->key, (long)pair->value);
   }
 
-  // Delete every map created with CMapNew.
-  CMapDelete(map);
+  // Delete every map created with map__new.
+  map__delete(map);
 }
 
 ```
 
 Remaining functions:
 
-* `CMapUnset` - Removes the given key from the map; does nothing if the
+* `map__unset` - Removes the given key from the map; does nothing if the
   key is not in the map to begin with.
-* `CMapClear` - Removes all elements from the map.
+* `map__clear` - Removes all items from the map.
 
-## Using `CList`
+Like `Array`, `Map` supports custom memory management on its items.
+Each `Map` has two function pointers, `key_releaser` and `value_releaser` which,
+if set, are called each time a key/value pair is removed from the map.
+
+## Using `List`
 
 This container is a lightweight singly-linked list.
-It makes to use `CList` instead of `CArray` when:
+It makes to use `List` instead of `Array` when:
 
-* You have many empty lists; an empty `CList` uses much less memory than an empty `CArray`.
-* You want to insert and remove elements using iterators and don't need random access.
+* You have many empty lists; an empty `List` uses much less memory than an empty `Array`.
+* You want to insert and remove items using iterators and don't need random access.
 
-An empty list is just a null pointer of type "CList *".
+An empty list is just a null pointer of type `List`.
 
-    CList *list = NULL;  // This is an empty list.
+    List list = NULL;  // This is an empty list.
 
 Here's an example use:
 
 ```
-// Create the list [1, 2, 3], reverse it, examine the first element,
-// and remove the first element.
+// Create the list [1, 2, 3], reverse it, examine the first item,
+// and remove the first item.
 
-CList list = NULL;  // This is effectively an empty list.
+List list = NULL;  // This is effectively an empty list.
 
 // Lists support inserts rather than appends, so we insert
 // the numbers in the order 3, 2, 1; the result is the list [1, 2, 3].
 for (long i = 3; i >= 1; --i) {
-  // Unlike CArray and CMap, you always pass in a "CList *" object
-  // as the first parameter of CList* functions; this is used to
+  // Unlike Array and Map, you always pass in a "List *" object
+  // as the first parameter of list functions; this is used to
   // support NULL pointers as empty lists.
-  CListInsert(&list, (void *)i);
-  // The 2nd param to CListInsert is the value inserted, of type (void *).
+  list__insert(&list, (void *)i);
+  // The 2nd param to list__insert is the value inserted, of type (void *).
   // You may store primitives cast to (void *), or store an arbitrary pointer.
 }
 
-// Print out the first element.
-printf("The first element is now %ld.\n", (long)list->element);  // It's 1.
+// Print out the first item.
+printf("The first item is now %ld.\n", (long)list->item);  // It's 1.
 
 printf("Reversing the list.\n");
-CListReverse(&list);
+list__reverse(&list);
 
-printf("The first element is now %ld.\n", (long)list->element);  // It's 3.
+printf("The first item is now %ld.\n", (long)list->item);  // It's 3.
 
 // Delete every non-empty list when done. It's safe to delete empty lists.
 // After this call, list == NULL, and remains a valid list for future use.
-CListDelete(&list);
+list__delete(&list);
 ```
 
-Other functions are described in `CList.h`.
+Other functions are described in `list.h`.
+
+Because `List` is focused on being extremely lightweight, it does
+not keep room for a custom memory management function pointer.
+If you want to add per-item memory management to a `List`, you can do so by:
+* directly calling your releaser with each call to `list__remove_first`, and
+* using `list__delete_and_release` instead of `list__delete`.
 
 The following is an informal summary of the remaining functions:
 
-* `CListRemoveFirst` - Removes the first element in constant time.
-* `CListDeleteAndRelease` - Similar to `CListDelete`, except that it
-  also calls a custom releaser on each element before removing it from
+* `list__remove_first` - Removes the first item in constant time.
+* `list__delete_and_release` - Similar to `list__delete`, except that it
+  also calls a custom releaser on each item before removing it from
   the list; useful for nested structures.
-* `CListFindEntry` - Finds an entry by value, returning a `CList *` to
+* `list__find_entry` - Finds an entry by value, returning a `List *` to
   the list's tail that begins with the value. The tail pointer is valid
-  input to any other `CList` function, including `CListDelete`.
-* `CListFindValue` - The same as `CListFindEntry`, but returns a pointer
-  to the element itself (of type `void *`) rather than to the tail of the list.
-* `CListCount` - Returns the number of elements in the list; takes
+  input to any other `List` function, including `list__delete`.
+* `list__find_value` - The same as `list__find_entry`, but returns a pointer
+  to the item itself (of type `void *`) rather than to the tail of the list.
+* `list__count` - Returns the number of items in the list; takes
   linear time.
