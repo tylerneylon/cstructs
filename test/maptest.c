@@ -135,7 +135,7 @@ int test_unset() {
 
 static int num_free_calls = 0;
 void free_with_counter(void *ptr) {
-  test_printf("%s(%p)\n", __func__, ptr);
+  test_printf("%s(%p)\n", __FUNCTION__, ptr);
   num_free_calls++;
   free(ptr);
 }
