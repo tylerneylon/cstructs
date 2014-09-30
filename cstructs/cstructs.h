@@ -2,7 +2,7 @@
 //
 // https://github.com/tylerneylon/cstructs
 //
-// Overall header for including CArray, CMap, and CList.
+// Overall header for including Array, List, and Map.
 // Friendly for linking with C++ sources.
 //
 

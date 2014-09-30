@@ -1,8 +1,8 @@
-# CStructs Makefile
+# cstructs Makefile
 #
-# This library is meant to be used by directly including the header you
-# need from among CArray.h, CMap.h, and CList.h and linking with the
-# object files CArray.o, CMap.o, and CList.o.
+# This library is meant to be used by incuding cstructs.h, or alternatively
+# only the header needed among array.h, list.h, and map.h; and linking with
+# the object files array.o, list.o, and map.o.
 #
 # The primary rules are:
 #
