@@ -72,7 +72,7 @@ int test_subarrays() {
   array->releaser = array__release;
 
   for (int i = 0; i < 10; ++i) {
-    Array subarray = array__init(array__new_item_ptr(array), 16, sizeof(int));
+    Array subarray = array__init(array__new_ptr(array), 16, sizeof(int));
     test_printf("subarray = %p\n", subarray);
     for (int j = 0; j < 5; ++j) {
       int newInt = j + i * 5;
@@ -216,11 +216,11 @@ int test_string_array() {
   Array array = array__new(4, sizeof(char *));
 
   // A nice way to add string literals.
-  array__new_item_val(array, char *) = "one";
-  array__new_item_val(array, char *) = "two";
+  array__new_val(array, char *) = "one";
+  array__new_val(array, char *) = "two";
 
   // A nice way to allocate & store runtime-created strings.
-  asprintf((char **)array__new_item_ptr(array), "thr%s", "ee");
+  asprintf((char **)array__new_ptr(array), "thr%s", "ee");
 
   // Note that if you mix the above methods, then you'll have
   // to be very careful about freeing the strings made by
@@ -290,8 +290,8 @@ int test_loops_on_growing_arrays() {
     size_t array_bytes = array->count * array->item_size;
     test_that(c >= array->items && c < (array->items + array_bytes));
     if (i < 4) {
-      *(char *)array__new_item_ptr(array) = 'x';
-      *(char *)array__new_item_ptr(array) = 'y';
+      *(char *)array__new_ptr(array) = 'x';
+      *(char *)array__new_ptr(array) = 'y';
     }
   }
 

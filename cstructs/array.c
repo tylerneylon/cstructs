@@ -58,10 +58,10 @@ void *array__item_ptr(Array array, int index) {
 }
 
 void array__add_item_ptr(Array array, void *item) {
-  memcpy(array__new_item_ptr(array), item, array->item_size);
+  memcpy(array__new_ptr(array), item, array->item_size);
 }
 
-void *array__new_item_ptr(Array array) {
+void *array__new_ptr(Array array) {
   if (array->count == array->capacity) {
     array->capacity *= 2;
     if (array->capacity == 0) array->capacity = 1;

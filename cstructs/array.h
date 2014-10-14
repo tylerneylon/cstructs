@@ -39,10 +39,10 @@ void *  array__item_ptr(Array array, int index);
 
 // Amortized constant-time operations (usually constant-time, sometimes linear).
 
-void    array__add_item_ptr (Array array, void *item);
+void    array__add_item_ptr(Array array, void *item);
 #define array__add_item_val(a, i) array__add_item_ptr(a, &i);
-void *  array__new_item_ptr (Array array);
-#define array__new_item_val(a, type) (*(type *)array__new_item_ptr(a))
+void *  array__new_ptr(Array array);
+#define array__new_val(a, type) (*(type *)array__new_ptr(a))
 
 // Possibly linear time operations.
 
@@ -67,7 +67,7 @@ void array__add_zeroed_items (Array array, int num_items);
   for (type item_ptr = (type)array__item_ptr(array, index); \
        index < array->count;                                \
        item_ptr = (type)array__item_ptr(array, ++index))
-// The (type) cast in arrayFor is required by C++.
+// The (type) cast in array__for is required by C++.
 
 typedef int (*array__CompareFunction)(void *, const void *, const void *);
 
