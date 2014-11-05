@@ -20,6 +20,7 @@ Array array__new(int capacity, size_t item_size) {
 }
 
 Array array__init(Array array, int capacity, size_t item_size) {
+  if (capacity < 1) capacity = 1;
   array->count = 0;
   array->capacity = capacity;
   array->item_size = item_size;
