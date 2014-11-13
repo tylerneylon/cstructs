@@ -4,6 +4,13 @@
 //
 // A minimalistic test framework.
 //
+// Warning: In some multithreaded test cases, this test
+// framework may print out both a success and a failure
+// message simultaneously on different threads. The
+// current way to deal with this is to visually inspect
+// the output for multithreaded tests to see if there
+// were any failure conditions.
+//
 
 #ifndef __CTEST_CTEST_H__
 #define __CTEST_CTEST_H__

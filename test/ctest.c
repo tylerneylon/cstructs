@@ -12,15 +12,17 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <unistd.h>
 
 // Platform-specific includes.
 #ifdef _WIN32
 #include "winutil.h"
+#include <process.h>
+#define getpid _getpid
 #else
 #include <alloca.h>
 #include <execinfo.h>
 #include <libgen.h>
+#include <unistd.h>
 #endif
 
 
