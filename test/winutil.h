@@ -6,6 +6,8 @@
 // cross-platform code.
 //
 
+#ifndef __WINUTIL_H__
+#define __WINUTIL_H__
 
 #ifdef _WIN32
 
@@ -45,7 +47,7 @@ static char *strsep(char **stringp, const char *delim) {
 
 #define vsnprintf(s, n, fmt, args) vsnprintf_s(s, n, _TRUNCATE, fmt, args)
 #define strncpy(dst, src, num) strncpy_s(dst, num, src, _TRUNCATE)
-#define snprintf(s, n, fmt, ...) sprintf_s(s, n, fmt, __VA_ARGS__)
+#define snprintf(s, n, fmt, ...) _snprintf_s(s, n, _TRUNCATE, fmt, __VA_ARGS__)
 
 static int vasprintf(char **ret, const char *fmt, va_list args) {
   *ret = NULL;
@@ -94,3 +96,5 @@ static char *win_strerror(int err) {
 }
 
 #endif
+
+#endif  // __WINUTIL_H__
