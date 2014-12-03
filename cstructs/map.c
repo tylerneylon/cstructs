@@ -23,28 +23,32 @@
 #define MAX_LOAD 2.5
 
 
-// private function declarations
-// =============================
+// Internal function declarations.
+// ===============================
 
 List *find_with_hash(Map map, void *needle, int h);
 List *bucket_find(List *bucket, void *needle, map__Eq eq);
 void double_size(Map map);
 void release_and_free_pair(Map map, map__key_value *pair);
-void release_key_value_pair(void *pair);
-void release_bucket(void *bucket);
 
-// This variable is safe for single-threaded use, but will
-// have to go if thread-safety is a future goal.
-static Map current_map;
+// This will be called from the array module.
+void release_bucket(void *bucket, void *map);
 
-// public functions
-// ================
+// This will be called from the list module.
+void release_key_value_pair(void *pair, void *map);
+
+
+// Public functions.
+// =================
 
 Map map__new(map__Hash hash, map__Eq eq) {
   Map map = malloc(sizeof(MapStruct));
   map->count = 0;
+
   map->buckets = array__new(MIN_BUCKETS, sizeof(void *));
+  map->buckets->releaser = release_bucket;
   array__add_zeroed_items(map->buckets, MIN_BUCKETS);
+
   map->hash = hash;
   map->eq = eq;
   map->key_releaser = NULL;
@@ -54,11 +58,7 @@ Map map__new(map__Hash hash, map__Eq eq) {
 }
 
 void map__delete(Map map) {
-  Map old_map = current_map;
-  current_map = map;
-  map->buckets->releaser = release_bucket;
-  array__delete(map->buckets);
-  current_map = old_map;
+  array__delete_with_context(map->buckets, map);
   free(map);
 }
 
@@ -68,9 +68,13 @@ map__key_value *map__set(Map map, void *key, void *value) {
   map__key_value *pair;
   if (entry) {
     pair = (*entry)->item;
-    if (map->key_releaser && pair->key != key) map->key_releaser(pair->key);
+    if (map->key_releaser && pair->key != key) {
+      map->key_releaser(pair->key, NULL);
+    }
     pair->key = key;
-    if (map->value_releaser && pair->value != value) map->value_releaser(pair->value);
+    if (map->value_releaser && pair->value != value) {
+      map->value_releaser(pair->value, NULL);
+    }
     pair->value = value;
     return pair;
   } else {
@@ -106,13 +110,10 @@ map__key_value *map__find(Map map, void *needle) {
 }
 
 void map__clear(Map map) {
-  Map old_map = current_map;
-  current_map = map;
   array__for(void **, elt_ptr, map->buckets, index) {
     List *list_ptr = (List *)elt_ptr;
-    list__delete_and_release(list_ptr, release_key_value_pair);
+    list__delete_and_release(list_ptr, release_key_value_pair, map);
   }
-  current_map = old_map;
   map->count = 0;
 }
 
@@ -184,15 +185,15 @@ void double_size(Map map) {
 }
 
 void release_and_free_pair(Map map, map__key_value *pair) {
-  if (map->key_releaser) map->key_releaser(pair->key);
-  if (map->value_releaser) map->value_releaser(pair->value);
+  if (map->key_releaser)   map->key_releaser  (pair->key,   NULL);
+  if (map->value_releaser) map->value_releaser(pair->value, NULL);
   free(pair);
 }
 
-void release_key_value_pair(void *pair) {
-  release_and_free_pair(current_map, (map__key_value *)pair);
+void release_key_value_pair(void *pair, void *map) {
+  release_and_free_pair((Map)map, (map__key_value *)pair);
 }
 
-void release_bucket(void *bucket) {
-  list__delete_and_release((List *)bucket, release_key_value_pair);
+void release_bucket(void *bucket, void *map) {
+  list__delete_and_release((List *)bucket, release_key_value_pair, map);
 }

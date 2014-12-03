@@ -26,7 +26,7 @@ void *list__remove_first (List *list);            // Returns the removed item; N
 void *list__move_first   (List *from, List *to);  // Returns the moved item; NULL on empty lists.
 
 void list__delete             (List *list);
-void list__delete_and_release (List *list, Releaser releaser);
+void list__delete_and_release (List *list, Releaser releaser, void *context);
 
 List *list__find_entry (List *list, void *needle, int (*val_eq_needle)(void *, void *));
 void *list__find_value (List *list, void *needle, int (*val_eq_needle)(void *, void *));

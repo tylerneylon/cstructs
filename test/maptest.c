@@ -134,7 +134,7 @@ int test_unset() {
 }
 
 static int num_free_calls = 0;
-void free_with_counter(void *ptr) {
+void free_with_counter(void *ptr, void *ctx) {
   test_printf("%s(%p)\n", __FUNCTION__, ptr);
   num_free_calls++;
   free(ptr);
@@ -186,7 +186,7 @@ int test_delete_in_for() {
   int i = 0;
   map__for(pair, map) {
     if (i == 1) {
-      map->value_releaser(pair->value);
+      map->value_releaser(pair->value, NULL);
       pair->value = strdup("4");
       test_that(num_free_calls == 1);
     } else if (i == 2) {

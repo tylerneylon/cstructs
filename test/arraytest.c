@@ -8,7 +8,9 @@
 #include "ctest.h"
 
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
+#include <time.h>
 
 #include "winutil.h"
 
@@ -69,7 +71,7 @@ int test_int_array() {
 // This tests a pattern using an array of arrays of ints.
 int test_subarrays() {
   Array array = array__new(16, sizeof(ArrayStruct));
-  array->releaser = array__release;
+  array->releaser = array__release_with_context;
 
   for (int i = 0; i < 10; ++i) {
     Array subarray = array__init(array__new_ptr(array), 16, sizeof(int));
@@ -95,7 +97,7 @@ int test_subarrays() {
 
 // Test that the releaser is properly called.
 static int num_releaser_calls = 0;
-void counting_releaser(void *element) {
+void counting_releaser(void *element, void *context) {
   num_releaser_calls++;
 }
 
@@ -315,6 +317,39 @@ int test_two_loops() {
   return test_success;
 }
 
+static void *magic_val;
+
+void get_magic_val(void *item, void *context) {
+  test_that(context == magic_val);
+}
+
+// Make sure that the context is correctly sent in to a releaser.
+int test_releaser_context() {
+
+  srand(time(NULL));  // NULL --> unused `time_t *` output
+  magic_val = (void *)(intptr_t)rand();
+  Array array;
+
+  test_printf("Testing array__delete_with_context.\n");
+  array = array__new(4, sizeof(char));
+  for (char c = 'a'; c <= 'd'; ++c) array__add_item_val(array, c);
+  array__delete_with_context(array, magic_val);
+
+  test_printf("Testing array__clear_with_context.\n");
+  array = array__new(4, sizeof(char));
+  for (char c = 'a'; c <= 'd'; ++c) array__add_item_val(array, c);
+  array__clear_with_context(array, magic_val);
+  array__delete(array);
+
+  test_printf("Testing array__release_with_context.\n");
+  array = array__new(4, sizeof(char));
+  for (char c = 'a'; c <= 'd'; ++c) array__add_item_val(array, c);
+  array__release_with_context(array, magic_val);
+  free(array);
+
+  return test_success;
+}
+
 
 int main(int argc, char **argv) {
   set_verbose(0);  // Set this to 1 for additional debugging output.
@@ -324,7 +359,7 @@ int main(int argc, char **argv) {
     test_clear, test_sort, test_remove, test_find,
     test_indexof, test_string_array, test_edge_cases,
     test_empty_loops, test_loops_on_growing_arrays,
-    test_two_loops
+    test_two_loops, test_releaser_context
   );
   return end_all_tests();
 }

@@ -39,13 +39,13 @@ void *list__move_first(List *from, List *to) {
 }
 
 void list__delete(List *list) {
-  list__delete_and_release(list, NULL);
+  list__delete_and_release(list, NULL, NULL);
 }
 
-void list__delete_and_release(List *list, Releaser releaser) {
+void list__delete_and_release(List *list, Releaser releaser, void *context) {
   while (*list) {
     List next = (*list)->next;
-    if (releaser) releaser((*list)->item);
+    if (releaser) releaser((*list)->item, context);
     free(*list);
     *list = next;
   }

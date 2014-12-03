@@ -24,7 +24,7 @@ int int_eq(void *a, void *b) {
 
 int num_free_calls = 0;
 
-void counted_free(void *ptr) {
+void counted_free(void *ptr, void *ctx) {
   free(ptr);
   num_free_calls++;
 }
@@ -52,7 +52,7 @@ int test_list() {
       needle, result, (result ? *result : -1));
   test_that(result && *result == needle);
 
-  list__delete_and_release(&list, counted_free);
+  list__delete_and_release(&list, counted_free, NULL);  // NULL --> context
   test_that(list == NULL);
   test_that(num_free_calls == 10);
 

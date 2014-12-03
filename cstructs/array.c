@@ -33,25 +33,37 @@ Array array__init(Array array, int capacity, size_t item_size) {
   return array;
 }
 
-void array__clear(Array array) {
+void array__clear_with_context(Array array, void *context) {
   if (array->releaser) {
     for (int i = 0; i < array->count; ++i) {
-      array->releaser(array__item_ptr(array, i));
+      array->releaser(array__item_ptr(array, i), context);
     }
   }
   array->count = 0;
 }
 
-void array__release(void *array) {
+void array__release_with_context(void *array, void *context) {
   Array a = (Array)array;
-  array__clear(a);
+  array__clear_with_context(a, context);
   free(a->items);
   a->capacity = 0;
 }
 
-void array__delete(Array array) {
-  array__release(array);
+void array__delete_with_context(Array array, void *context) {
+  array__release_with_context(array, context);
   free(array);
+}
+
+void array__clear(Array array) {
+  array__clear_with_context(array, NULL);   // NULL --> context
+}
+
+void array__release(void *array) {
+  array__release_with_context(array, NULL);  // NULL --> context
+}
+
+void array__delete(Array array) {
+  array__delete_with_context(array, NULL);  // NULL --> context
 }
 
 void *array__item_ptr(Array array, int index) {
@@ -86,7 +98,7 @@ int array__index_of(Array array, void *item) {
 }
 
 void array__remove_item(Array array, void *item) {
-  if (array->releaser) array->releaser(item);
+  if (array->releaser) array->releaser(item, NULL);
   int num_left = --(array->count);
   char *item_byte = (char *)item;
   ptrdiff_t byte_dist = item_byte - array->items;

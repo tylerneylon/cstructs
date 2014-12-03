@@ -12,7 +12,7 @@
 
 #include <stdlib.h>
 
-typedef void (*Releaser)(void *item);
+typedef void (*Releaser)(void *item, void *context);
 
 typedef struct {
   int      count;
@@ -33,6 +33,11 @@ Array array__init (Array array, int capacity, size_t item_size);  // For use on 
 void  array__clear   (Array array);  // Releases all items and sets count to 0.
 void  array__release (void *array);  // Clears array and frees all capacity; doesn't free array itself.
 void  array__delete  (Array array);  // Releases array and frees array itself.
+
+// These do the same job as the above versions and send a context value to the releaser.
+void array__clear_with_context   (Array array, void *context);
+void array__release_with_context (void *array, void *context);
+void array__delete_with_context  (Array array, void *context);
 
 void *  array__item_ptr(Array array, int index);
 #define array__item_val(array, i, type) (*(type *)array__item_ptr(array, i))
