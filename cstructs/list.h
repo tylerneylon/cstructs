@@ -12,9 +12,6 @@
 
 #include <stdlib.h>
 
-// TODO Consider trying to use a union for the item
-//      in order to more easily work with ints as items.
-
 typedef struct ListStruct {
   void *              item;
   struct ListStruct * next;
