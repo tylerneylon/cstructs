@@ -77,7 +77,7 @@ int test_cmap() {
   int num_tested = 100;
   for (int i = 0; i < num_tested; ++i) {
     int j = rand() % NUM_PAIRS;
-    map__key_value *pair = map__find(map, pairs[j].str);
+    map__key_value *pair = map__get(map, pairs[j].str);
     int found_value = (int)(long)(pair->value);
     if (found_value != pairs[j].num) {
       test_failed("For key %s, expected value %d but map returned %d\n",
@@ -90,7 +90,7 @@ int test_cmap() {
   int num_checks = (int)1e4;
   for (int i = 0; i < num_checks; ++i) {
     char *str = make_random_str();
-    if(map__find(map, str)) num_found++;
+    if(map__get(map, str)) num_found++;
     test_that((float)num_found / num_checks < 0.01);
     free(str);
   }
@@ -120,13 +120,13 @@ int test_unset() {
 
   print_map(map);
 
-  test_that(map__find(map, "games") != NULL);
+  test_that(map__get(map, "games") != NULL);
 
   map__unset(map, "games");
   test_printf("After unsetting \"games\":\n");
   print_map(map);
 
-  test_that(map__find(map, "games") == NULL);
+  test_that(map__get(map, "games") == NULL);
 
   map__delete(map);
 
@@ -161,7 +161,7 @@ int test_clear() {
   // Make sure we can still use the map.
   map__set(map, "five", strdup("5"));
   test_that(map->count == 1);
-  test_that(map__find(map, "five") != NULL);
+  test_that(map__get(map, "five") != NULL);
 
   map__delete(map);
 

@@ -1,6 +1,6 @@
 #!/usr/local/bin/python3
 #
-# convert.py from https://github.com/tylerneylon/cstructs
+# convert1.py from https://github.com/tylerneylon/cstructs
 #
 # A tool to convert existing C code that uses the old
 # cstructs names over to using the new cstructs names.

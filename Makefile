@@ -38,7 +38,7 @@ testenv = DYLD_INSERT_LIBRARIES=/usr/lib/libgmalloc.dylib MALLOC_LOG_FILE=/dev/n
 # Build everything.
 all: $(obj) $(tests) $(examples)
 
-# Build all tests.
+# Build and run all tests.
 test: $(tests)
 	@echo Running tests:
 	@echo -

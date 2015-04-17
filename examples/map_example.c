@@ -38,11 +38,11 @@ void use_map() {
   map__set(map, "xyz", (void *)2L);
 
   // We can lookup any key in expected constant time.
-  map__key_value *pair = map__find(map, "rgb");
+  map__key_value *pair = map__get(map, "rgb");
   // Now pair == NULL, since "rgb" is not a key in our map.
 
   // This looks up and prints out the value 2 for the key "xyz".
-  pair = map__find(map, "xyz");
+  pair = map__get(map, "xyz");
   printf("pair->value=%ld\n", (long)pair->value);
 
   // Print out the entire map. The result is:

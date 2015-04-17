@@ -104,7 +104,7 @@ void map__unset(Map map, void *key) {
   map->count--;
 }
 
-map__key_value *map__find(Map map, void *needle) {
+map__key_value *map__get(Map map, void *needle) {
   List *entry = find_with_hash(map, needle, map->hash(needle));
   return entry ? (*entry)->item : NULL;
 }

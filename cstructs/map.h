@@ -39,7 +39,7 @@ void             map__delete (Map map);
 
 map__key_value * map__set    (Map map, void *key, void *value);
 void             map__unset  (Map map, void *key);
-map__key_value * map__find   (Map map, void *needle);
+map__key_value * map__get    (Map map, void *needle);
 
 void             map__clear  (Map map);
 
