@@ -351,6 +351,69 @@ int test_releaser_context() {
   return test_success;
 }
 
+// Test array__insert_items.
+int test_insert_items() {
+  Array array = array__new(0, sizeof(char));
+  for (char c = 'a'; c <= 'z'; ++c) array__add_item_val(array, c);
+  test_that(array->count == 26);
+
+  // 1. Test insertion at the start.
+  test_printf("About to run insert_items test 1.\n");
+  array__insert_items(array,  // array
+                      0,      // index
+                      "012",  // items
+                      3);     // num_items
+  test_that(array->count == 29);
+  test_that(array__item_val(array, 0, char) == '0');
+  test_that(array__item_val(array, 1, char) == '1');
+  test_that(array__item_val(array, 3, char) == 'a');
+
+  // 2. Test insertion at the end.
+  test_printf("About to run insert_items test 2.\n");
+  array__insert_items(array,         // array
+                      array->count,  // index
+                      "345",         // items
+                      3);            // num_items
+  test_that(array->count == 32);
+  test_that(array__item_val(array,  0, char) == '0');
+  test_that(array__item_val(array,  3, char) == 'a');
+  test_that(array__item_val(array, 29, char) == '3');
+
+  // 3. Test insertion in the middle.
+  test_printf("About to run insert_items test 3.\n");
+  array__insert_items(array,  // array
+                      3,      // index
+                      "678",  // items
+                      3);     // num_items
+  test_that(array->count == 35);
+  test_that(array__item_val(array,  0, char) == '0');
+  test_that(array__item_val(array,  3, char) == '6');
+  test_that(array__item_val(array, 32, char) == '3');
+
+  // 4. Test insertion into an empty list.
+  test_printf("About to run insert_items test 4.\n");
+  array__clear(array);
+  array__insert_items(array,  // array
+                      0,      // index
+                      "012",  // items
+                      3);     // num_items
+  test_that(array->count == 3);
+  test_that(array__item_val(array, 0, char) == '0');
+  test_that(array__item_val(array, 1, char) == '1');
+
+  // 5. Test insertion of 0 items.
+  test_printf("About to run insert_items test 5.\n");
+  array__insert_items(array,  // array
+                      0,      // index
+                      "345",  // items
+                      0);     // num_items
+  test_that(array->count == 3);
+
+  array__delete(array);
+
+  return test_success;
+}
+
 
 int main(int argc, char **argv) {
   set_verbose(0);  // Set this to 1 for additional debugging output.
@@ -360,7 +423,8 @@ int main(int argc, char **argv) {
     test_clear, test_sort, test_remove, test_find,
     test_indexof, test_string_array, test_edge_cases,
     test_empty_loops, test_loops_on_growing_arrays,
-    test_two_loops, test_releaser_context
+    test_two_loops, test_releaser_context,
+    test_insert_items
   );
   return end_all_tests();
 }
