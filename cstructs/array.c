@@ -88,10 +88,10 @@ void *array__new_ptr(Array array) {
 void array__insert_items(Array array, int index, void *items, int num_items) {
   // array starts as <prefix> <suffix>; we'll move over <suffix> so it becomes
   //                 <prefix> <new-items> <suffix>.
-  int num_new_item_bytes = num_items * array->item_size;
+  long num_new_item_bytes = num_items * array->item_size;
   // The order here is important. We want to use the original count first. The
   // expansion may change array->items, so we only refer to it afterwards.
-  int num_suffix_bytes = (array->count - index) * array->item_size;
+  long num_suffix_bytes = (array->count - index) * array->item_size;
   array__add_zeroed_items(array, num_items);
   char *index_pt = (char *)array->items + index * array->item_size;
   memmove(index_pt + num_new_item_bytes,  // dst

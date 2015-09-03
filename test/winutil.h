@@ -6,8 +6,7 @@
 // cross-platform code.
 //
 
-#ifndef __WINUTIL_H__
-#define __WINUTIL_H__
+#pragma once
 
 #ifdef _WIN32
 
@@ -85,6 +84,12 @@ static char *stpncpy(char *dst, const char *src, size_t n) {
   return next_dst;
 }
 
+static size_t strlcat(char *dst, const char *src, size_t size) {
+  size_t ideal_size = strlen(dst) + strlen(src);
+  strncat_s(dst, size, src, _TRUNCATE);
+  return ideal_size;
+}
+
 #define strncat(dst, src, num) strncat_s(dst, num, src, _TRUNCATE)
 
 #define strerror win_strerror
@@ -96,5 +101,3 @@ static char *win_strerror(int err) {
 }
 
 #endif
-
-#endif  // __WINUTIL_H__
